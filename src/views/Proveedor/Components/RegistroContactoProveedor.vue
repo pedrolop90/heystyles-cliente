@@ -50,7 +50,7 @@
                                     class="mb-3"
                                     placeholder="Numero de documento"
                                     addon-left-icon="fa fa-info"
-                                    v-model="model.documento">
+                                    v-model="model.numeroDocumento">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Email</small>
@@ -123,7 +123,7 @@ export default {
                 nombres: '',
                 apellidos: '',
                 tipoDocumento: '',
-                documento: '',
+                numeroDocumento: '',
                 email: '',
                 telefono: '',
                 fechaNacimiento: moment().format('YYYY-MM-DD'),

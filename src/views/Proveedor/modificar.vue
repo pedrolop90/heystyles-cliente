@@ -80,6 +80,7 @@
                                             <i class="fa fa-plus-circle" aria-hidden="true"></i>
                                             Contacto
                                         </base-button>
+                                        <base-button outline @click="eliminar()" type="danger">Eliminar</base-button>
                                         <base-button outline @click="guardarCambios()" type="success">Guardar Cambios</base-button>
                                     </div>
                                 </div>
@@ -162,7 +163,7 @@ import axios from 'axios'
         ],
         camposTablaContacto: [
             { key: 'nombreCompleto', label: 'Nombre Completo' },
-            { key: 'documento', label: 'Documento' },
+            { key: 'numeroDocumento', label: 'Documento' },
             { key: 'email', label: 'Email' },
             { key: 'telefono', label: 'Telefono' },
             'Quitar'
@@ -177,8 +178,8 @@ import axios from 'axios'
             const self = this
             axios.post(this.servidorAcceso + 'proveedor/proveedores', {
                 proveedor: this.model,
-                contactos: this.model.contacto,
-                cuentasBancos: this.model.cuentaBanco
+                contactos: this.model.contactos,
+                cuentasBanco: this.model.cuentasBanco
             })
             .then(response => {
                 this.$toast.success({
@@ -195,7 +196,6 @@ import axios from 'axios'
             })
         },
         registrarAux() {
-            console.log(this.model)
             const proveedor = {
                 ...this.model
             }
@@ -256,8 +256,8 @@ import axios from 'axios'
             const self = this
             axios.put(this.servidorAcceso + 'usuarios/proveedores', {
                 proveedor: this.model,
-                contactos: this.model.contacto,
-                cuentasBancos: this.model.cuentaBanco
+                contactos: this.model.contactos,
+                cuentasBanco: this.model.cuentasBanco
             })
             .then(response => {
                 this.$toast.success({
@@ -273,6 +273,30 @@ import axios from 'axios'
                     message: error.response.data.errors[0].message
                 })
             })
+        },
+        eliminar () {
+            axios.delete(this.servidorAcceso + 'usuarios/proveedores/' + this.model.id)
+            .then(response => {
+                this.$toast.success({
+                    title: 'Eliminación Exitosa',
+                    message: 'Se elimino el proveedor correctamente'
+                })
+                this.$router.push('/proveedor/')
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+            /*
+            const email = this.model.email
+            this.$store.commit('quitarUsuario', email)
+            this.$router.push('/usuario/')
+            this.$toast.success({
+                title: 'Exito',
+                message: 'Se ha dado de baja correctamente'
+            })*/
         }
     },
     watch: {
@@ -285,8 +309,12 @@ import axios from 'axios'
         }
     },
     async created () {
-        this.model = (await axios.get(this.servidorAcceso + 'usuarios/proveedores/' + this.proveedorOriginal.id)).data.data
-        console.log (this.model)
+        const info = (await axios.get(this.servidorAcceso + 'usuarios/proveedores/' + this.proveedorOriginal.id)).data.data
+        this.model = {
+            ...info.proveedor,
+            contactos: info.contactos,
+            cuentasBanco: info.cuentasBanco
+        }
     }
   }
 </script>

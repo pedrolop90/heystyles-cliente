@@ -21,6 +21,7 @@
                                                         placeholder="Nombres"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.nombres"
+                                                        ref="nombre"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -145,6 +146,9 @@ import axios from 'axios'
             }).then(response => (this.info = response))
         },
         actualizarAux () {
+            if (!this.validacion()) {
+                return
+            }
             const usuario = {
                 ...this.model,
                 contrasena: this.model.numeroDocumento
@@ -158,6 +162,40 @@ import axios from 'axios'
         },
         async apiCargos () {
             this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+        },
+        validacion () {
+            const nombreCampo = []
+            if (this.model.nombres === '') {
+                nombreCampo.push('nombres') 
+            }
+            if (this.model.apellidos === '') {
+                nombreCampo.push('apellidos')
+            }
+            if (this.model.numeroDocumento === '') {
+                nombreCampo.push('numero de documento')
+            }
+            const a = this.model.email.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3,4})+$/)
+            console.log('++++ ' + a + ' ----- ' + a[0])
+            if (a === '') {
+                nombreCampo.push('email')
+            }
+            if (this.model.fechaNacimiento === '') {
+                nombreCampo.push('fecha de nacimiento')
+            }
+            if (this.model.tipoDocumento === '') {
+                nombreCampo.push('tipo de documento')
+            }
+            if (this.model.telefono === '') {
+                nombreCampo.push('telefono')
+            }
+            if (nombreCampo.length > 0) {
+                this.$toast.info({
+                    title: 'Datos Vacios',
+                    message: 'Los siguientes datos no pueden estas vacios ' + nombreCampo.join(', ')
+                })
+                return false
+            }
+            return true
         }
     },
     created: function() {

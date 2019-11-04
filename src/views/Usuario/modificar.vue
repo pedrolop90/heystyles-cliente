@@ -147,15 +147,15 @@ import axios from 'axios'
     },
     methods: {
         async guardarCambios () {
-            axios.post(this.servidorAcceso + 'usuarios/usuarios', {
+            axios.put(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
             })
-            .then(function () {
+            .then(response => {
                 this.$toast.success({
                     title: 'Registro Exitoso',
                     message: 'Se registro el usuario correctamente'
                 })
-                this.limpiarCampos()
+                this.$router.push('/usuario/')
             })
             .catch(error => {
                 this.$toast.error({
@@ -190,13 +190,28 @@ import axios from 'axios'
             }
         },
         eliminar () {
+            axios.delete(this.servidorAcceso + 'usuarios/usuarios/' + this.model.id)
+            .then(response => {
+                this.$toast.success({
+                    title: 'Eliminación Exitosa',
+                    message: 'Se elimino el usuario correctamente'
+                })
+                this.$router.push('/usuario/')
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+            /*
             const email = this.model.email
             this.$store.commit('quitarUsuario', email)
             this.$router.push('/usuario/')
             this.$toast.success({
                 title: 'Exito',
                 message: 'Se ha dado de baja correctamente'
-            })
+            })*/
         }
     },
     created: function() {

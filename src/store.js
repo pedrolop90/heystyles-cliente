@@ -54,10 +54,8 @@ export default new Vuex.Store({
     },
     mutations: {
         cambiarEstadoCuenta(state, correo) {
-            console.log('Si entre ' + correo)
             state.usuarios.forEach(element => {
                 if (correo === element.email) {
-                    console.log('El correo es ' + element.email)
                     element.estadoCuenta = true
                     state.sesionActiva = element
                 }
@@ -70,36 +68,28 @@ export default new Vuex.Store({
             state.sesionActiva = undefined
         },
         modificarUsuario (state, usuario) {
-            console.log('modificarUsuario  ' + usuario)
             const nuevos = []
             state.usuarios.forEach(element => {
-                console.log( 'como entra ' + element )
                 if (element.email === usuario.email) {
-                    console.log( ' encontre algo ' + usuario.nombres )
                     element = usuario
                 }
-                console.log( 'como sale ' + element )
                 nuevos.push(element)
             })
             state.usuarios = nuevos
         },
         quitarUsuario ( state, email ) {
-            console.log('entre a eliminar ' + email)
             const usu = state.usuarios.find(function (u) {
                 return u.email === email
             })
-            console.log('entre a eliminar ' + usu)
             var i = state.usuarios.indexOf( usu );
             state.usuarios.splice( i, 1 );
         },
         modificarProveedor (state, proveedor) {
             const nuevos = []
             state.proveedor.forEach(element => {
-                console.log( 'como entra ' + element )
                 if (element.email === proveedor.email) {
                     element = proveedor
                 }
-                console.log( 'como sale ' + element )
                 nuevos.push(element)
             })
             state.proveedor = nuevos
@@ -107,12 +97,9 @@ export default new Vuex.Store({
         modificarCargos (state, cargo) {
             const nuevos = []
             state.cargos.forEach(element => {
-                console.log( 'cargo.id ' + cargo.id + "   element.id " + element.id )
-                console.log( 'como entra ' + element.permisos )
                 if (element.id === cargo.id) {
                     element = cargo
                 }
-                console.log( 'como sale ' + element.permisos )
                 nuevos.push(element)
             })
             state.cargos = nuevos

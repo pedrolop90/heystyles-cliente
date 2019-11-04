@@ -22,6 +22,7 @@
                                                         placeholder="Nombre"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.nombre"
+                                                        :required="true"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -172,7 +173,7 @@ import axios from 'axios'
             axios.post(this.servidorAcceso + 'usuarios/proveedores', {
                 proveedor: this.model,
                 contactos: this.model.contacto,
-                cuentasBancos: this.model.cuentaBanco
+                cuentasBanco: this.model.cuentaBanco
             })
             .then(response => {
                 this.$toast.success({
