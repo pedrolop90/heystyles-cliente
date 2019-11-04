@@ -29,7 +29,7 @@
                                 <span class="text-muted">Recordarme</span>
                             </base-checkbox>
                             <div class="text-center">
-                                <base-button type="primary" @click="ingresarAux()" class="my-4">Ingresar</base-button>
+                                <base-button type="primary" @click="ingresar()" class="my-4">Ingresar</base-button>
                             </div>
                         </form>
                     </div>
@@ -43,7 +43,8 @@
         </div>
 </template>
 <script>
-import {mapState} from 'vuex'
+import {mapState, mapMutations} from 'vuex'
+import axios from 'axios'
   export default {
     name: 'login',
     data() {
@@ -55,7 +56,8 @@ import {mapState} from 'vuex'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'usuarios']),
+        ...mapState(['servidorSeguridad', 'usuarios', 'servidorAcceso', 'menu']),
+        ...mapMutations(['iniciarSesion', 'consultarSesion']),
         validarEmail () {
             if (this.model.email === '') {
                 return false
@@ -76,8 +78,34 @@ import {mapState} from 'vuex'
         }
     },
     methods: {
-        ingresar () {
-            this.$router.push('/Perfil') 
+        async ingresar () {
+            const self = this
+            axios.post(this.servidorSeguridad + 'auth/login', {
+                ...this.model
+            })
+            .then(response => {
+                const datos = response.data.data
+                if (!self.validarUsuarioActivo (datos)) {
+                    return false
+                }
+                this.$toast.success({
+                    title: 'Bienvenido',
+                    message: 'Login exitoso'
+                })
+                // self.menu = datos.menuExtended.hijos
+                // console.log('menu ' + self.menu)
+                // console.log(response.data.data)
+                // console.log(response.data.data.menuExtended.hijos)
+                self.$store.commit('iniciarSesion', response.data.data.menuExtended.hijos)
+                self.$store.commit('consultarSesion', response.data.data.usuario)
+                this.$router.push('/perfil/')
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: 'La contraseña o correo es incorrecto'
+                })
+            })
         },
         ingresarAux () {
             const self = this
@@ -91,7 +119,6 @@ import {mapState} from 'vuex'
             const valido = this.usuarios.find(function (u) {
                 return u.email === self.model.email && u.contrasena === self.model.password
             })
-            console.log('el resultado es  ' + valido)
             if (valido === undefined) {
                 this.$toast.info({
                     title: 'Login Fallido',
@@ -101,8 +128,23 @@ import {mapState} from 'vuex'
             }
             const correo = valido.email
             this.$store.commit('cambiarEstadoCuenta', correo)
-            setTimeout(3000)
             this.$router.push('/Perfil')
+        },
+        limpiarCampos () {
+            this.model.password = ''
+            this.model.email = ''
+        },
+        validarUsuarioActivo (datos) {
+            console.log(datos.menuExtended.estado)
+            if (datos.menuExtended.estado !== 'ACTIVO') {
+                this.$toast.error({
+                    title: 'Login Fallido',
+                    message: 'Este usuario esta inactivo para hacer login'
+                })
+                return false
+            } else {
+                return true
+            }
         }
     },
     created () {

@@ -1,11 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import moment from 'moment'
+import axios from 'axios'
 
 Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
-        servidorAcceso: 'http://1a713d1e.ngrok.io/',
+        servidorSeguridad: 'http://ec2-35-153-69-39.compute-1.amazonaws.com:9000/seguridad/',
+        servidorAcceso: 'http://ec2-35-153-69-39.compute-1.amazonaws.com:9010/',
+        menu: undefined,
         usuarios: [
             {
                 nombres: 'JOHN JAIRO',
@@ -103,6 +106,13 @@ export default new Vuex.Store({
                 nuevos.push(element)
             })
             state.cargos = nuevos
+        },
+        iniciarSesion (state, hijos) {
+            state.menu = hijos
+            console.log(hijos)
+        },
+        async consultarSesion (state, usuario) {
+            state.sesionActiva = (await axios.get(state.servidorAcceso + 'usuarios/usuarios/numeroDocumento/' + usuario)).data.data
         }
     },
     actions: {

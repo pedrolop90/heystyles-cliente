@@ -51,6 +51,11 @@ export default new Router({
           component: () => import('./views/Proveedor/index.vue')
         },
         {
+          path: '/proveedores',
+          name: 'proveedor',
+          component: () => import('./views/Proveedor/index.vue')
+        },
+        {
           path: '/proveedor/registro',
           name: 'registroProveedor',
           component: () => import('./views/Proveedor/registrar.vue')

@@ -6,8 +6,9 @@
       title="Argon"
     >
       <template slot="links">
-        <sidebar-item :link="{name: 'Usuario', icon: 'fa fa-address-card text-green', path: '/usuario/'}"/>
-        <sidebar-item :link="{name: 'Proveedor', icon: 'fa fa-truck text-green', path: '/proveedor/'}"/>
+        <sidebar-item 
+        v-for="item in menu" :key="item.id"
+         :link="{name: item.nombre , icon: item.icono, path: item.path}"/>
       </template>
     </side-bar>
     <div class="main-content" :data="sidebarBackground">
@@ -27,6 +28,7 @@
   import DashboardNavbar from './DashboardNavbar.vue';
   import ContentFooter from './ContentFooter.vue';
   import { FadeTransition } from 'vue2-transitions';
+  import {mapState} from 'vuex'
 
   export default {
     components: {
@@ -45,6 +47,9 @@
           this.$sidebar.displaySidebar(false);
         }
       }
+    },
+    computed: {
+      ...mapState(['menu'])
     }
   };
 </script>

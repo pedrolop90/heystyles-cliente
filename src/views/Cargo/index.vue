@@ -62,22 +62,33 @@ export default {
             {key: 'descripcion', label: 'descripcion'}
         ],
         verModal: false,
-        cargos: undefined
+        cargos: undefined,
+        permisos: undefined
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'permisos'])
+        ...mapState(['servidorAcceso', 'servidorSeguridad'])
     },
     watch: {
-        'model.id': function () {
+        'model.id': async function () {
             const self = this
+            console.log('id ' + this.model.id)
+            if (this.model.id === undefined) {
+                return
+            }
+            const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
+            this.model = {
+                ...datos
+            }
+            console.log('>-------------<')
+            console.log(datos)
+            /*
             this.model = {
                 ...this.cargos.find(function (cargo) {
                     console.log(cargo.permisos)
                     return cargo.id === self.model.id
                 })
-            }
-            console.log('<>' + this.model.permisos)
+            } */
         },
         'model.permisos': function () {
             this.mostrarTabla = true
@@ -85,12 +96,21 @@ export default {
             const self = this
             console.log('entre ----')
             let index = -1
+            if (this.model.permisos === undefined) {
+                return
+            }
             this.model.permisos.forEach(function (per) {
-                console.log('entre ----')
                 index = -1
+                console.log('----------------')
+                console.log('')
                 const encontrado = self.permisos.find(function (p) {
                     index++
-                    return p.id === per
+                    console.log(p.id)
+                    console.log(per.id)
+                    if (per.id === undefined) {
+                        return false
+                    }
+                    return p.id === per.id
                 })
                 if (encontrado) {
                     self.$refs.tabla.selectRow(index)
@@ -102,7 +122,7 @@ export default {
         seleccionado (items) {
             this.model.permisos = []
             items.forEach(element => {
-                this.model.permisos.push(element.id)
+                this.model.permisos.push(element)
             })
             console.log('seleccionado ' + this.model.permisos)
         },
@@ -110,7 +130,8 @@ export default {
             const cargo = {
                 ...this.model
             }
-            this.$store.commit('modificarCargos', cargo)
+            
+            // this.$store.commit('modificarCargos', cargo)
             this.$router.push('/usuario/')
         },
         esActivo (value) {
@@ -118,10 +139,15 @@ export default {
         },
         async apiCargos () {
             this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+        },
+        async apiPermisos () {
+            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
+            console.log(this.permisos)
         }
     },
     created () {
         this.apiCargos()
+        this.apiPermisos()
     }
 }
 </script>

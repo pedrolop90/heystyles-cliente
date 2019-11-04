@@ -11,7 +11,7 @@
                                 </div>
                             </div>
                         </div>
-                        <template>
+                        <template v-if="sesionActiva !== undefined && sesionActiva !== null">
                             <form @submit.prevent>
                                 <div class="pl-lg-4">
                                     <div class="row">
@@ -87,7 +87,7 @@
                                         </div>
                                     </div>
                                     <div class="text-right" >
-                                        <base-button outline @click="actualizarAux()" type="success">Actualizar Información</base-button>
+                                        <base-button outline @click="actualizar()" type="success">Actualizar Información</base-button>
                                     </div>
                                 </div>
                             </form>
@@ -139,11 +139,26 @@ import axios from 'axios'
     computed: {
         ...mapState(['servidorAcceso','sesionActiva'])
     },
+    watch: {
+        sesionActiva () {
+            if (this.sesionActiva !== undefined) {
+                this.model = {
+                    ...this.sesionActiva
+                }
+            }
+        }
+    },
     methods: {
         async actualizar () {
-            axios.post(this.servidorAcceso + '/usuarios/personas', {
+            axios.put(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
-            }).then(response => (this.info = response))
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Algunos cambios se veran reflejados al iniciar sesión de nuevo'
+                })
+            ))
+            this.$store.commit('consultarSesion', this.model.numeroDocumento)
         },
         actualizarAux () {
             if (!this.validacion()) {
@@ -161,7 +176,7 @@ import axios from 'axios'
             })
         },
         async apiCargos () {
-            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            this.cargos = (await axios.get(this.servidorAcceso + 'usuarios/cargos')).data.data
         },
         validacion () {
             const nombreCampo = []
@@ -200,12 +215,10 @@ import axios from 'axios'
     },
     created: function() {
         this.apiCargos()
-        console.log(this.sesionActiva)
-        this.model = {
-            ...this.sesionActiva
-        }
-        if (!this.sesionActiva) {
-            this.$router.push('/')
+        if (this.sesionActiva) {
+            this.model = {
+                ...this.sesionActiva
+            }
         }
     }
   }
