@@ -22,14 +22,14 @@
                                     />
                                 </div>
                             </div>
-                            <div v-show="model.nombre !== ''">
+                            <div v-show="model.nombre.length > 2">
                                 <h6 class="heading-small text-muted mb-4">Seleccione los Permisos</h6>
                                 <b-table striped hover selectable :fields="columnasPermisos" :items="permisos" @row-selected="seleccionado" responsive="sm" select-mode="multi" ref="tabla">
                                 </b-table>
                             </div>
                             
                             <div class="text-right" >
-                                <base-button outline type="success" v-show="model.nombre !== ''" @click="crearPermiso()">
+                                <base-button outline type="success" v-show="model.nombre.length > 2" @click="crearPermiso()">
                                     Registrar Cargo
                                 </base-button>
                             </div>

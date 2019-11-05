@@ -21,7 +21,8 @@
                                     class="mb-3"
                                     placeholder="Nombres contacto"
                                     addon-left-icon="fa fa-university"
-                                    v-model="model.nombres">
+                                    v-model="model.nombres"
+                                    :valid="validarNombres">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Apellidos</small>
@@ -30,7 +31,8 @@
                                     class="mb-3"
                                     placeholder="Apellidos"
                                     addon-left-icon="fa fa-university"
-                                    v-model="model.apellidos">
+                                    v-model="model.apellidos"
+                                    :valid="validarApellidos">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Tipo Documento</small>
@@ -38,7 +40,8 @@
                         <base-input alternative
                                     class="mb-3"
                                     placeholder="Tipo Documento"
-                                    addon-left-icon="fa fa-list-ul">
+                                    addon-left-icon="fa fa-list-ul"
+                                    :valid="validarTipoDocumento">
                             <select class="form-control" v-model="model.tipoDocumento">
                                 <option v-for="item in tipoDocumentos" :key="item.value" :value="item.value" >{{ item.text }}</option>
                             </select>
@@ -50,7 +53,8 @@
                                     class="mb-3"
                                     placeholder="Numero de documento"
                                     addon-left-icon="fa fa-info"
-                                    v-model="model.numeroDocumento">
+                                    v-model="model.numeroDocumento"
+                                    :valid="validarNumeroDocumento">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Email</small>
@@ -59,7 +63,8 @@
                                     class="mb-3"
                                     placeholder="Email"
                                     addon-left-icon="fa fa-info"
-                                    v-model="model.email">
+                                    v-model="model.email"
+                                    :valid="validarEmail">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Telefono</small>
@@ -68,7 +73,8 @@
                                     class="mb-3"
                                     placeholder="Numero de telefono"
                                     addon-left-icon="fa fa-info"
-                                    v-model="model.telefono">
+                                    v-model="model.telefono"
+                                    :valid="validarTelefono">
                         </base-input>
                         <div class="mb-3">
                             <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
@@ -76,7 +82,8 @@
                             </div>
                             <base-input alternative=""
                                 placeholder="Fecha de Nacimiento"
-                                input-classes="form-control-alternative">
+                                input-classes="form-control-alternative"
+                                :valid="validarFechaNacimiento">
                                 <flat-picker slot-scope="{focus, blur}"
                                     @on-open="focus"
                                     @on-close="blur"
@@ -120,12 +127,12 @@ export default {
             activo: false,
             tipoDocumentos: TIPO_DOCUMENTO,
             model: {
-                nombres: '',
-                apellidos: '',
-                tipoDocumento: '',
-                numeroDocumento: '',
-                email: '',
-                telefono: '',
+                nombres: undefined,
+                apellidos: undefined,
+                tipoDocumento: undefined,
+                numeroDocumento: undefined,
+                email: undefined,
+                telefono: undefined,
                 fechaNacimiento: moment().format('YYYY-MM-DD'),
                 idPersona: null,
                 id: null
@@ -138,6 +145,71 @@ export default {
     computed: {
         esActivo () {
             return this.activo
+        },
+        validarNombres () {
+            if (this.model.nombres === '' ) {
+                return false
+            }
+            else if (this.model.nombres === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarApellidos () {
+            if (this.model.apellidos === '' ) {
+                return false
+            }
+            else if (this.model.apellidos === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarTipoDocumento () {
+            if (this.model.tipoDocumento === '' ) {
+                return false
+            }
+            else if (this.model.tipoDocumento === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarNumeroDocumento () {
+            if (this.model.numeroDocumento === '' ) {
+                return false
+            }
+            else if (this.model.numeroDocumento === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarEmail () {
+            if (this.model.email === '') {
+                return false
+            }
+            else if (this.model.email === undefined) {
+                return undefined
+            } else if (/^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(this.model.email)) {
+                return true
+            }
+            return false
+        },
+        validarTelefono () {
+            if (this.model.telefono === '' ) {
+                return false
+            }
+            else if (this.model.telefono === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarFechaNacimiento () {
+            if (this.model.fechaNacimiento === '' ) {
+                return false
+            }
+            else if (this.model.fechaNacimiento === undefined) {
+                return undefined
+            }
+            return true
         }
     },
     watch: {
@@ -151,6 +223,13 @@ export default {
     },
     methods: {
         agregar () {
+            if (!this.validacion()) {
+                this.$toast.info({
+                    title: 'No se puede agregar el contacto',
+                    message: 'Existen campos vacios o no validos dentro del formulario'
+                })
+                return
+            }
             console.log('entrew ' + this.model)
             this.$emit('agregarContacto', this.model)
             this.limpiar()
@@ -166,6 +245,13 @@ export default {
                 tipoCuenta: '',
                 numeroCuenta: ''
             }
+        },
+        validacion () {
+            if (this.validarNombres && this.validarApellidos && this.validarTipoDocumento
+            && this.validarNumeroDocumento && this.validarEmail && this.validarTelefono && this.validarFechaNacimiento) {
+                return true
+            }
+            return false
         }
     }
 }

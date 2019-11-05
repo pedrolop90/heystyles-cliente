@@ -21,7 +21,8 @@
                                     class="mb-3"
                                     placeholder="Nombre del Banco"
                                     addon-left-icon="fa fa-university"
-                                    v-model="model.nombreBanco">
+                                    v-model="model.nombreBanco"
+                                    :valid="validarNombreBanco">
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Tipo de Cuenta</small>
@@ -29,7 +30,8 @@
                         <base-input alternative
                                     class="mb-3"
                                     placeholder="Tipo de Cuenta"
-                                    addon-left-icon="fa fa-list-ul">
+                                    addon-left-icon="fa fa-list-ul"
+                                    :valid="validarTipoCuenta">
                             <select class="form-control" v-model="model.tipoCuenta">
                                 <option v-for="item in tiposCuenta" :key="item.value" :value="item.value" >{{ item.text }}</option>
                             </select>
@@ -41,7 +43,8 @@
                                     class="mb-3"
                                     placeholder="Numero de Cuenta"
                                     addon-left-icon="fa fa-info"
-                                    v-model="model.numeroCuenta">
+                                    v-model="model.numeroCuenta"
+                                    :valid="validarNumeroCuenta">
                         </base-input>
                         <div class="text-center py-1">
                             <base-button @click="agregar()" type="primary" class="my-6 fa fa-check" style="min-width: 150px; margin: 3px !important">
@@ -74,9 +77,9 @@ export default {
             activo: false,
             tiposCuenta: TIPO_CUENTA,
             model: {
-                nombreBanco: '',
-                tipoCuenta: '',
-                numeroCuenta: '',
+                nombreBanco: undefined,
+                tipoCuenta: undefined,
+                numeroCuenta: undefined,
                 proveedorId: null,
                 id: null
             }
@@ -85,6 +88,33 @@ export default {
     computed: {
         esActivo () {
             return this.activo
+        },
+        validarNombreBanco () {
+            if (this.model.nombreBanco === '' ) {
+                return false
+            }
+            else if (this.model.nombreBanco === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarTipoCuenta () {
+            if (this.model.tipoCuenta === '' ) {
+                return false
+            }
+            else if (this.model.tipoCuenta === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarNumeroCuenta () {
+            if (this.model.numeroCuenta === '' ) {
+                return false
+            }
+            else if (this.model.numeroCuenta === undefined) {
+                return undefined
+            }
+            return true
         }
     },
     watch: {
@@ -97,6 +127,13 @@ export default {
     },
     methods: {
         agregar () {
+            if (!this.validacion()) {
+                this.$toast.info({
+                    title: 'No se puede agregar la cuenta de banco',
+                    message: 'Existen campos vacios o no validos dentro del formulario'
+                })
+                return
+            }
             console.log('entrew ' + this.model)
             this.$emit('agregarCuenta', this.model)
             this.limpiar()
@@ -112,6 +149,12 @@ export default {
                 tipoCuenta: '',
                 numeroCuenta: ''
             }
+        },
+        validacion () {
+            if (this.validarNombreBanco && this.validarTipoCuenta && this.validarNumeroCuenta) {
+                return true
+            }
+            return false
         }
     }
 }

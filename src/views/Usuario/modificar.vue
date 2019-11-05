@@ -21,6 +21,7 @@
                                                         placeholder="Nombres"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.nombres"
+                                                        :valid="validarNombres"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -29,17 +30,18 @@
                                                         placeholder="Apellidos"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.apellidos"
+                                                        :valid="validarApellidos"
                                             />
                                         </div>
                                         <div class="col-lg-4">
-                                            <base-input label="Cargo">
+                                            <base-input label="Cargo" :valid="validarCargo">
                                                 <select class="form-control" v-model="model.cargoId">
                                                     <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id" >{{ cargo.nombre }}</option>
                                                 </select>
                                             </base-input>
                                         </div>
                                         <div class="col-lg-4">
-                                            <base-input label="Tipo Documento">
+                                            <base-input label="Tipo Documento" :valid="validarTipoDocumento">
                                                 <select class="form-control" v-model="model.tipoDocumento">
                                                     <option v-for="item in tiposDocumento" :key="item.value" :value="item.value" >{{ item.text }}</option>
                                                 </select>
@@ -51,6 +53,7 @@
                                                         placeholder="N. Documento"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.numeroDocumento"
+                                                        :valid="validarNumeroDocumento"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -59,6 +62,7 @@
                                                         placeholder="heystyles@example.com"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.email"
+                                                        :valid="validarEmail"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -67,6 +71,7 @@
                                                         placeholder="5 555 555"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.telefono"
+                                                        :valid="validarTelefono"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -74,7 +79,8 @@
                                                         label="Fecha de Nacimiento"
                                                         placeholder="Fecha de Nacimiento"
                                                         input-classes="form-control-alternative"
-                                                        v-model="model.lastName">
+                                                        v-model="model.lastName"
+                                                        :valid="validarFechaNacimiento">
                                                 <flat-picker slot-scope="{focus, blur}"
                                                             @on-open="focus"
                                                             @on-close="blur"
@@ -143,17 +149,98 @@ import axios from 'axios'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'usuarios'])
+        ...mapState(['servidorAcceso', 'usuarios']),
+        validarNombres () {
+            if (this.model.nombres === '') {
+                return false
+            }
+            else if (this.model.nombres === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarApellidos () {
+            if (this.model.apellidos === '') {
+                return false
+            }
+            else if (this.model.apellidos === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarNumeroDocumento () {
+            if (this.model.numeroDocumento === '') {
+                return false
+            }
+            else if (this.model.numeroDocumento === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarEmail () {
+            if (this.model.email === '') {
+                return false
+            }
+            else if (this.model.email === undefined) {
+                return undefined
+            } else if (/^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(this.model.email)) {
+                return true
+            }
+            return false
+        },
+        validarTelefono () {
+            if (this.model.telefono === '') {
+                return false
+            }
+            else if (this.model.telefono === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarFechaNacimiento () {
+            if (this.model.fechaNacimiento === '') {
+                return false
+            }
+            else if (this.model.fechaNacimiento === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarTipoDocumento () {
+            if (this.model.tipoDocumento === '' ) {
+                return false
+            }
+            else if (this.model.tipoDocumento === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarCargo () {
+            if (this.model.cargoId === '' ) {
+                return false
+            }
+            else if (this.model.cargoId === undefined) {
+                return undefined
+            }
+            return true
+        }
     },
     methods: {
         async guardarCambios () {
+            if (!this.validacion()) {
+                this.$toast.info({
+                    title: 'No se puede actualizar su información',
+                    message: 'Existen campos vacios o no validos dentro del formulario'
+                })
+                return
+            }
             axios.put(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
             })
             .then(response => {
                 this.$toast.success({
                     title: 'Registro Exitoso',
-                    message: 'Se registro el usuario correctamente'
+                    message: 'Se actualizo el usuario correctamente'
                 })
                 this.$router.push('/usuario/')
             })
@@ -212,6 +299,13 @@ import axios from 'axios'
                 title: 'Exito',
                 message: 'Se ha dado de baja correctamente'
             })*/
+        },
+        validacion () {
+            if (this.validarNombres && this.validarApellidos && this.validarCargo && this.validarTipoDocumento
+            && this.validarNumeroDocumento && this.validarEmail && this.validarTelefono && this.validarFechaNacimiento) {
+                return true
+            }
+            return false
         }
     },
     created: function() {

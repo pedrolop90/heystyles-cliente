@@ -23,6 +23,7 @@
                                                         input-classes="form-control-alternative"
                                                         v-model="model.nombre"
                                                         :required="true"
+                                                        :valid="validarNombre"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -31,6 +32,7 @@
                                                         placeholder="Descripción"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.descripcion"
+                                                        :valid="validarDescripcion"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -39,6 +41,7 @@
                                                         placeholder="Telefono"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.telefono"
+                                                        :valid="validarTelefono"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -47,6 +50,7 @@
                                                         placeholder="Dirección"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.direccion"
+                                                        :valid="validarDireccion"
                                             />
                                         </div>
                                         <div class="col-lg-4">
@@ -55,18 +59,20 @@
                                                         placeholder="heystyles@example.com"
                                                         input-classes="form-control-alternative"
                                                         v-model="model.email"
+                                                        :valid="validarEmail"
                                             />
                                         </div>
                                         <div class="col-lg-4">
                                             <base-input 
                                                 alternative=""
                                                 type="number"
-                                                label="Fecha Limite"
+                                                label="Días limite de Pago"
                                                 placeholder="Días limite de Pago"
                                                 input-classes="form-control-alternative"
                                                 v-model="model.fechaLimitePago"
                                                 min= 0
                                                 max= 365
+                                                :valid="validarFechaLimite"
                                             />
                                         </div>
                                     </div>
@@ -137,11 +143,11 @@ import axios from 'axios'
     data() {
       return {
         model: {
-            nombre: '',
-            descripcion: '',
-            telefono: '',
-            direccion: '',
-            email: '',
+            nombre: undefined,
+            descripcion: undefined,
+            telefono: undefined,
+            direccion: undefined,
+            email: undefined,
             fechaLimitePago: 0,
             id: null,
             cuentaBanco: [],
@@ -165,10 +171,74 @@ import axios from 'axios'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'proveedor'])
+        ...mapState(['servidorAcceso', 'proveedor']),
+        validarNombre () {
+            if (this.model.nombre === '' ) {
+                return false
+            }
+            else if (this.model.nombre === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarDescripcion () {
+            if (this.model.descripcion === '' ) {
+                return false
+            }
+            else if (this.model.descripcion === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarTelefono () {
+            if (this.model.telefono === '' ) {
+                return false
+            }
+            else if (this.model.telefono === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarDireccion () {
+            if (this.model.direccion === '' ) {
+                return false
+            }
+            else if (this.model.direccion === undefined) {
+                return undefined
+            }
+            return true
+        },
+        validarEmail () {
+            if (this.model.email === '') {
+                return false
+            }
+            else if (this.model.email === undefined) {
+                return undefined
+            } else if (/^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i.test(this.model.email)) {
+                return true
+            }
+            return false
+        },
+        validarFechaLimite () {
+            try {
+                if (this.model.fechaLimitePago > 0 && this.model.fechaLimitePago <= 365) {
+                    return true
+                }
+            } catch (error) {
+                return false
+            }
+            return false
+        },
     },
     methods: {
         async registrar () {
+            if (!this.validacion()) {
+                this.$toast.info({
+                    title: 'No se puede registrar el proveedor',
+                    message: 'Existen campos vacios o no validos dentro del formulario principal'
+                })
+                return
+            }
             const self = this
             axios.post(this.servidorAcceso + 'usuarios/proveedores', {
                 proveedor: this.model,
@@ -228,7 +298,7 @@ import axios from 'axios'
                 telefono: '',
                 direccion: '',
                 email: '',
-                fechaLimitePago: 0,
+                fechaLimitePago: undefined,
                 id: undefined
             }
         },
@@ -241,6 +311,13 @@ import axios from 'axios'
             this.model.contacto = this.model.contacto.filter( function( e ) {
                 return e !== item
             } )
+        },
+        validacion () {
+            if (this.validarNombre && this.validarDescripcion && this.validarTelefono
+            && this.validarDireccion && this.validarEmail && this.validarFechaLimite) {
+                return true
+            }
+            return false
         }
     },
     watch: {
