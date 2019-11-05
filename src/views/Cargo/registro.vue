@@ -123,7 +123,7 @@ export default {
                 })
             })
             // this.$store.commit('modificarCargos', cargo)
-            this.$router.push('/usuario/')
+            this.$router.push('/cargo/')
         },
         esActivo (value) {
             this.verModal = value

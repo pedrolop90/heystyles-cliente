@@ -189,6 +189,7 @@ export default {
                     message: error.response.data.errors[0].message
                 })
             })
+            this.$router.push('usuario/')
         }
     },
     created () {
