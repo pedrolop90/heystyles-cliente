@@ -81,6 +81,11 @@ export default new Router({
           path: 'cargo/',
           name: 'cargo',
           component: () => import('./views/Cargo/index.vue')
+        },
+        {
+          path: 'cargo/registrar',
+          name: 'registrarCargo',
+          component: () => import('./views/Cargo/registro.vue')
         }
       ]
     },

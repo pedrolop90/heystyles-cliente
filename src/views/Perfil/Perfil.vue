@@ -146,6 +146,9 @@ import axios from 'axios'
                     ...this.sesionActiva
                 }
             }
+        },
+        'model.cargoId' () {
+            console.log('cambie')
         }
     },
     methods: {

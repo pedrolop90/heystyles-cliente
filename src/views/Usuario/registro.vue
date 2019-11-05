@@ -143,7 +143,7 @@ import axios from 'axios'
             axios.post(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
             })
-            .then(function () {
+            .then(response => {
                 consle.log('hola')
                 this.$router.push('/usuario/')
                 this.$toast.success({

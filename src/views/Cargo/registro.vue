@@ -7,27 +7,19 @@
                         <div slot="header" class="bg-white border-0">
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h3 class="mb-0">Gestion de Cargos</h3>
+                                    <h3 class="mb-0">Crear de Cargo</h3>
                                 </div>
                             </div>
                         </div>
                         <template>
                             <div class="row">
                                 <div class="col-lg-4">
-                                    <base-input label="Cargos">
-                                        <b-form-select class="form-control" v-model="cargoSeleccionado" :options="cargos">
-                                        </b-form-select>
-                                    </base-input>
-                                </div>
-                                <div class="col-lg-8">
-                                    <base-button class="my-4" outline type="info" @click="crearCargo()">
-                                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                                        Crear Cargo
-                                    </base-button>
-                                    <base-button class="my-4" outline type="warning" @click="eliminarCargo()">
-                                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                                        Eliminar Cargo
-                                    </base-button>
+                                    <base-input alternative=""
+                                        label="Nombre"
+                                        placeholder="Nuevo cargo"
+                                        input-classes="form-control-alternative"
+                                        v-model="model.nombre"
+                                    />
                                 </div>
                             </div>
                             <div v-show="model.nombre !== ''">
@@ -37,8 +29,8 @@
                             </div>
                             
                             <div class="text-right" >
-                                <base-button outline type="success" v-show="model.nombre !== ''" @click="asignarPermisos()">
-                                    Asignar Permisos
+                                <base-button outline type="success" v-show="model.nombre !== ''" @click="crearPermiso()">
+                                    Registrar Cargo
                                 </base-button>
                             </div>
                         </template>
@@ -57,51 +49,23 @@ export default {
     data() {
       return {
         model: {
-            id: '',
+            id: null,
             nombre: '',
             idSecurity: null,
-            nivel: null,
+            nivel: 0,
             permisos: []
         },
         columnasPermisos: [
             {key: 'nombre', label: 'Nombre'},
             {key: 'descripcion', label: 'descripcion'}
         ],
-        verModal: false,
-        cargos: [],
-        permisos: undefined,
-        cargoSeleccionado: ''
+        permisos: undefined
       }
     },
     computed: {
         ...mapState(['servidorAcceso', 'servidorSeguridad'])
     },
     watch: {
-        cargoSeleccionado : async function () {
-            const self = this
-                this.model.id = this.cargoSeleccionado
-                console.log('id ' + this.model.id)
-                const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
-                this.model = {
-                    ...datos
-                }
-                console.log('>-------------<')
-                console.log(datos)
-                this.model.id = datos.cargo.id
-                this.model.nombre = datos.cargo.nombre
-                /*
-                this.model = {
-                    ...this.cargos.find(function (cargo) {
-                        console.log(cargo.permisos)
-                        return cargo.id === self.model.id
-                    })
-                } */
-        },
-        'model.id': {
-            handler: async function () {
-                
-            }
-        },
         'model.permisos': function () {
             this.mostrarTabla = true
             this.$refs.tabla.clearSelected()
@@ -138,49 +102,18 @@ export default {
             })
             console.log('seleccionado ' + this.model.permisos)
         },
-        async asignarPermisos () {
+        async crearPermiso () {
             const self = this
-            axios.put(this.servidorAcceso + 'usuarios/cargos', {
-                ...self.model,
+            axios.post(this.servidorAcceso + 'usuarios/cargos', {
+                cargo: self.model,
                 permisos: self.model.permisos
-            }).then(response => (
-                this.$toast.success({
-                    title: 'Actualizacion Exitosa',
-                    message: 'Cargo Actualizado Exitosamente'
-                })
-            ))
-            // this.$store.commit('modificarCargos', cargo)
-            this.$router.push('/usuario/')
-        },
-        esActivo (value) {
-            this.verModal = value
-        },
-        async apiCargos () {
-            const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
-            const self = this
-            c.forEach(function (cargo) {
-                const aux = {
-                    ...cargo,
-                    text: cargo.nombre,
-                    value: cargo.id
-                }
-                console.log(aux)
-                self.cargos.push(aux)
             })
-        },
-        async apiPermisos () {
-            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
-            console.log(this.permisos)
-        },
-        crearCargo () {
-            this.$router.push('cargo/registrar')
-        },
-        eliminarCargo () {
-            axios.delete(this.servidorAcceso + 'usuarios/cargos/' + this.model.id)
             .then(response => {
+                consle.log('hola')
+                this.$router.push('cargo/')
                 this.$toast.success({
-                    title: 'Eliminación Exitosa',
-                    message: 'Se elimino el cargo correctamente'
+                    title: 'Exito',
+                    message: 'Se ha registrado el cargo satisfatoriamente'
                 })
             })
             .catch(error => {
@@ -189,6 +122,18 @@ export default {
                     message: error.response.data.errors[0].message
                 })
             })
+            // this.$store.commit('modificarCargos', cargo)
+            this.$router.push('/usuario/')
+        },
+        esActivo (value) {
+            this.verModal = value
+        },
+        async apiCargos () {
+            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+        },
+        async apiPermisos () {
+            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
+            console.log(this.permisos)
         }
     },
     created () {
