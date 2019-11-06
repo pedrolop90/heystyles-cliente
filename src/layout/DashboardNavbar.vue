@@ -25,7 +25,7 @@
                             <span>Mi perfil</span>
                         </router-link>
                         <div class="dropdown-divider"></div>
-                        <router-link to="/login" class="dropdown-item">
+                        <router-link to="/" class="dropdown-item">
                             <i class="ni ni-user-run"></i>
                             <span>Cerrar Sesion</span>
                         </router-link>
