@@ -133,14 +133,15 @@ export default {
                 numeroDocumento: undefined,
                 email: undefined,
                 telefono: undefined,
-                fechaNacimiento: moment().format('YYYY-MM-DD'),
+                fechaNacimiento: undefined,
                 idPersona: null,
                 id: null
-            }
+            },
+            limiteEdad: moment().subtract('years',15)
         }
     },
-    create () {
-        console.log('secreo')
+    created () {
+        this.model.fechaNacimiento = this.limiteEdad.format('YYYY-MM-DD')
     },
     computed: {
         esActivo () {
@@ -209,12 +210,14 @@ export default {
             else if (this.model.fechaNacimiento === undefined) {
                 return undefined
             }
+            if (this.limiteEdad.isBefore(this.model.fechaNacimiento)) {
+                return false
+            }
             return true
         }
     },
     watch: {
         verModalContacto () {
-            console.log('entre')
             this.activo = this.verModalContacto
         },
         activo () {
@@ -230,7 +233,6 @@ export default {
                 })
                 return
             }
-            console.log('entrew ' + this.model)
             this.$emit('agregarContacto', this.model)
             this.limpiar()
             this.activo = false

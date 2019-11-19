@@ -98,9 +98,12 @@
                                         <h2>Cuenta Bancarias</h2>
                                         <b-table hover small striped :fields="camposTablaCuentaBanco" :items="model.cuentasBanco">
                                             <template slot="Quitar" slot-scope="data">
-                                                <base-button type="warning" @click="quitarCuenta(data.item)">
-                                                    <i class="fa fa-minus-circle" aria-hidden="true"></i>
-                                                    Quitar Cuenta
+                                                <base-button
+                                                    outline
+                                                    type="warning"
+                                                    @click="quitarCuenta(data.item)"
+                                                    v-b-popover.hover.top="'Eliminar esta Cuenta Bancaria'">
+                                                    <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
                                                 </base-button>
                                             </template>
                                         </b-table>
@@ -113,9 +116,12 @@
                                                 {{ data.item.nombres }} {{data.item.apellidos}}
                                             </template>
                                             <template slot="Quitar" slot-scope="data">
-                                                <base-button type="warning" @click="quitarContacto(data.item)">
-                                                    <i class="fa fa-minus-circle" aria-hidden="true"></i>
-                                                    Quitar Contacto
+                                                <base-button
+                                                    outline
+                                                    type="warning"
+                                                    @click="quitarContacto(data.item)"
+                                                    v-b-popover.hover.top="'Eliminar este Contacto de Proveedor'">
+                                                    <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
                                                 </base-button>
                                             </template>
                                         </b-table>
