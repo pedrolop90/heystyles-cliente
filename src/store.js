@@ -7,7 +7,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         servidorSeguridad: 'http://ec2-3-84-146-56.compute-1.amazonaws.com:9000/seguridad/',
-        servidorAcceso: 'http://ec2-3-84-146-56.compute-1.amazonaws.com:9010/',
+        servidorAcceso: 'http://2c7d9c48.ngrok.io/',
         menu: undefined,
         usuarios: [
             {

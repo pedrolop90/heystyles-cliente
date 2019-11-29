@@ -87,7 +87,7 @@
                                             <i class="fa fa-plus-circle" aria-hidden="true"></i>
                                             Contacto
                                         </base-button>
-                                        <base-button outline @click="eliminar()" type="danger">Eliminar</base-button>
+                                        <base-button outline @click="eliminar()" type="danger">Deshabilitar</base-button>
                                         <base-button outline @click="guardarCambios()" type="success">Guardar Cambios</base-button>
                                     </div>
                                 </div>

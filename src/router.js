@@ -52,7 +52,7 @@ export default new Router({
         },
         {
           path: '/proveedores',
-          name: 'proveedor',
+          name: 'proveedores',
           component: () => import('./views/Proveedor/index.vue')
         },
         {
@@ -86,6 +86,42 @@ export default new Router({
           path: 'cargo/registrar',
           name: 'registrarCargo',
           component: () => import('./views/Cargo/registro.vue')
+        },
+        {
+          path: '/producto',
+          name: 'producto',
+          component: () => import('./views/Producto/index.vue')
+        },
+        {
+          path: 'producto/modificar',
+          name: 'modificarProducto',
+          component: () => import('./views/Producto/modificar.vue'),
+          props: (route) => ({ productorOriginal: route.params.productoOriginal })
+        },
+        {
+          path: '/producto/registro',
+          name: 'registroProducto',
+          component: () => import('./views/Producto/registro.vue')
+        },
+        {
+          path: 'marca/',
+          name: 'marca',
+          component: () => import('./views/Marca/index.vue')
+        },
+        {
+          path: 'marca/registrar',
+          name: 'registrarMarca',
+          component: () => import('./views/Marca/registrar.vue')
+        },
+        {
+          path: 'item/',
+          name: 'items',
+          component: () => import('./views/ItemProducto/index.vue')
+        },
+        {
+          path: 'factura/',
+          name: 'facturas',
+          component: () => import('./views/Factura/index.vue')
         }
       ]
     },

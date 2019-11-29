@@ -70,15 +70,12 @@ export default {
             this.mostrarTabla = true
             this.$refs.tabla.clearSelected()
             const self = this
-            console.log('entre ----')
             let index = -1
             if (this.model.permisos === undefined) {
                 return
             }
             this.model.permisos.forEach(function (per) {
                 index = -1
-                console.log('----------------')
-                console.log('')
                 const encontrado = self.permisos.find(function (p) {
                     index++
                     console.log(p.id + ' - ' + per)
@@ -100,7 +97,6 @@ export default {
             items.forEach(element => {
                 this.model.permisos.push(element.id)
             })
-            console.log('seleccionado ' + this.model.permisos)
         },
         async crearPermiso () {
             const self = this

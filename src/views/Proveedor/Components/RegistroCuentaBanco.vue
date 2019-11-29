@@ -15,14 +15,16 @@
                     </div>
                     <form role="form">
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
-                            <small>Nombre del banco</small>
+                            <small>Nombre del Banco</small>
                         </div>
                         <base-input alternative
                                     class="mb-3"
                                     placeholder="Nombre del Banco"
                                     addon-left-icon="fa fa-university"
-                                    v-model="model.nombreBanco"
                                     :valid="validarNombreBanco">
+                            <select class="form-control" v-model="model.nombreBanco">
+                                <option v-for="item in bancos" :key="item.value" :value="item.value" >{{ item.text }}</option>
+                            </select>
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">
                             <small>Tipo de Cuenta</small>
@@ -64,6 +66,12 @@ const TIPO_CUENTA = [
     {value: 'CC', text: 'Cuenta Corriente'},
     {value: 'C', text: 'Convenio'}
 ]
+const BANCOS = [
+    { idBanco: '1', nombre: 'BANCOLOMBIA',  text: 'BANCOLOMBIA', value: 'BANCOLOMBIA'},
+    { idBanco: '2', nombre: 'BANCO DE BOGOTA',  text: 'BANCO DE BOGOTA', value: 'BANCO DE BOGOTA'},
+    { idBanco: '3', nombre: 'COLPATRIA',  text: 'COLPATRIA', value: 'COLPATRIA'},
+    { idBanco: '4', nombre: 'BANCO DAVIVIENDA',  text: 'BANCO DAVIVIENDA', value: 'BANCO DAVIVIENDA'}
+]
 export default {
     name: 'RegistroCuentaBanco',
     props: {
@@ -76,6 +84,7 @@ export default {
         return {
             activo: false,
             tiposCuenta: TIPO_CUENTA,
+            bancos: BANCOS,
             model: {
                 nombreBanco: undefined,
                 tipoCuenta: undefined,

@@ -1,0 +1,212 @@
+<template>
+    <div>
+        <div class="container-fluid mt--5">
+            <div class="row">
+                <div class="col-xl-12 order-xl-1">
+                    <card shadow type="secondary">
+                        <div slot="header" class="bg-white border-0">
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h3 class="mb-0">Gestionar Item de Producto</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <template>
+                            <div>
+                                <h6 class="heading-small text-muted mb-4">Lista de Items</h6>
+                                <b-table hover small striped :fields="columnasItem" :items="productos">
+                                        <template slot="Eliminar" slot-scope="data">
+                                            <base-button
+                                                outline
+                                                type="warning"
+                                                @click="eliminarProducto(data.item)"
+                                                v-b-popover.hover.top="'Eliminar Producto'">
+                                                <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
+                                            </base-button>
+                                        </template>
+                                        <template slot="unidadMedida" slot-scope="data">
+                                            {{ data.item.unidadMedida.abreviatura }}
+                                        </template>
+                                </b-table>
+                            </div>
+                            <div class="text-right" >
+                                <registrar-item :verModal="verModal" @esActivo="esActivo" @agregarItem="agregarItem"/>
+                                    <base-button outline type="secondary" @click="verModal = true" >
+                                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                    Crear Item de Producto
+                                </base-button>
+                            </div>
+                        </template>
+                    </card>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+import {mapState} from 'vuex'
+import axios from 'axios'
+import RegistrarItem from './registrar.vue'
+export default {
+    components: {
+        RegistrarItem
+    },
+    data() {
+      return {
+        model: {
+            id: '',
+            nombre: '',
+        },
+        columnasItem: [
+            { key: 'nombre', label: 'Nombre' },
+            { key: 'stockMinimo', label: 'Stock Minimo' },
+            { key: 'unidadMedida', label: 'Unidad de Medidad' },
+            'Eliminar'
+        ],
+        verModal: false,
+        productos: [
+            { nombre: 'Pegante Super 200 ml amarillo', descripcion: 'Pegante Super 200 ml amarillo', unidadMedida: 'ML', stockMinimo: '50' },
+            { nombre: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', descripcion: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', unidadMedida: 'MTR', stockMinimo: '100' }
+        ],
+        permisos: undefined,
+        marcaSeleccionado: ''
+      }
+    },
+    computed: {
+        ...mapState(['servidorAcceso', 'servidorSeguridad'])
+    },
+    watch: {
+        cargoSeleccionado : async function () {
+            const self = this
+                this.model.id = this.cargoSeleccionado
+                console.log('id ' + this.model.id)
+                const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
+                this.model = {
+                    ...datos
+                }
+                this.model.id = datos.cargo.id
+                this.model.nombre = datos.cargo.nombre
+                /*
+                this.model = {
+                    ...this.cargos.find(function (cargo) {
+                        console.log(cargo.permisos)
+                        return cargo.id === self.model.id
+                    })
+                } */
+        },
+        'model.id': {
+            handler: async function () {
+                
+            }
+        },
+        'model.permisos': function () {
+            this.mostrarTabla = true
+            this.$refs.tabla.clearSelected()
+            const self = this
+            let index = -1
+            if (this.model.permisos === undefined) {
+                return
+            }
+            this.model.permisos.forEach(function (per) {
+                index = -1
+                const encontrado = self.permisos.find(function (p) {
+                    index++
+                    console.log(p.id + ' - ' + per)
+                    console.log(p.id === per)
+                    if (per === undefined) {
+                        return false
+                    }
+                    return p.id === per
+                })
+                if (encontrado) {
+                    self.$refs.tabla.selectRow(index)
+                }
+            })
+        }
+    },
+    methods: {
+        seleccionado (items) {
+            this.model.permisos = []
+            items.forEach(element => {
+                this.model.permisos.push(element.id)
+            })
+            console.log('seleccionado ' + this.model.permisos)
+        },
+        async asignarPermisos () {
+            const self = this
+            axios.put(this.servidorAcceso + 'usuarios/cargos', {
+                ...self.model,
+                permisos: self.model.permisos
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Cargo Actualizado Exitosamente'
+                })
+            ))
+            // this.$store.commit('modificarCargos', cargo)
+            this.$router.push('/usuario/')
+        },
+        esActivo (value) {
+            this.verModal = value
+        },
+        async apiCargos () {
+            const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            const self = this
+            c.forEach(function (cargo) {
+                const aux = {
+                    ...cargo,
+                    text: cargo.nombre,
+                    value: cargo.id
+                }
+                console.log(aux)
+                self.cargos.push(aux)
+            })
+        },
+        async apiProductos () {
+            this.productos = (await axios.get(this.servidorAcceso + '/producto/producto')).data.data
+        },
+        crearMarca () {
+            this.$router.push('marca/registrar')
+        },
+        eliminarProducto (producto) {
+            const self = this
+            axios.delete(this.servidorAcceso + 'producto/producto/' + producto.id)
+            .then(response => {
+                this.$toast.success({
+                    title: 'Eliminación Exitosa',
+                    message: 'Se elimino el cargo correctamente'
+                })
+            self.apiProductos()
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+        },
+        agregarItem (informacion) {
+            const self = this
+            axios.post(this.servidorAcceso + '/producto/producto', {
+                ...informacion
+            })
+            .then(response => {
+                this.$toast.success({
+                    title: 'Registro Exitoso',
+                    message: 'Se creo el Item correctamente'
+                })
+                self.apiProductos()
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+        },
+    },
+    created () {
+        this.apiProductos()
+    }
+}
+</script>
