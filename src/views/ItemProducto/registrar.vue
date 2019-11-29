@@ -94,7 +94,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'servidorSeguridad']),
+        ...mapState(['servidorProducto', 'servidorSeguridad']),
         esActivo () {
             return this.activo
         },
@@ -167,7 +167,7 @@ export default {
         },
         async apiUnidadesMedidas () {
             this.unidadesMedida = []
-            const u = (await axios.get(this.servidorAcceso + '/producto/unidad-medida')).data.data
+            const u = (await axios.get(this.servidorProducto + '/producto/unidad-medida')).data.data
             const self = this
             console.log(u)
             u.forEach(function (medida) {

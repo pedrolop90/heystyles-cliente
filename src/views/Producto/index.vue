@@ -87,7 +87,7 @@ import Modificar from './modificar'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'usuarios'])
+        ...mapState(['servidorProducto', 'usuarios'])
     },
     methods: {
         async listarAux () {
@@ -95,7 +95,7 @@ import Modificar from './modificar'
             this.formatearItemsAux( usuarios )
         },
         async apiProductos () {
-            const productos = (await axios.get(this.servidorAcceso + 'producto/marca-producto')).data.data
+            const productos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
             this.itemsProductos = []
             this.formatearItems( productos )
         },
@@ -141,7 +141,7 @@ import Modificar from './modificar'
         },
         async eliminarProducto (producto) {
             console.log(producto)
-            const marcasDelProducto = (await axios.get(this.servidorAcceso + '/producto/producto/' + producto.id + '/marcas')).data.data
+            const marcasDelProducto = (await axios.get(this.servidorProducto + '/producto/producto/' + producto.id + '/marcas')).data.data
             const self = this
             const listaIdMarcas = []
             let repetida = false
@@ -151,7 +151,7 @@ import Modificar from './modificar'
                     listaIdMarcas.push(m.id)
                 }
             })
-            axios.put(self.servidorAcceso + 'producto/producto', {
+            axios.put(self.servidorProducto + 'producto/producto', {
                 producto: {
                     ...producto
                 },

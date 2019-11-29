@@ -103,7 +103,7 @@ import axios from 'axios'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'proveedor']),
+        ...mapState(['servidorProducto', 'proveedor']),
         validarNombre () {
             if (this.model.nombre === '' ) {
                 return false
@@ -161,7 +161,7 @@ import axios from 'axios'
                 return
             }
             const self = this
-            axios.post(this.servidorAcceso + 'usuarios/proveedores', {
+            axios.post(this.servidorProducto + 'usuarios/proveedores', {
                 proveedor: this.model,
                 contactos: this.model.contacto,
                 cuentasBanco: this.model.cuentaBanco

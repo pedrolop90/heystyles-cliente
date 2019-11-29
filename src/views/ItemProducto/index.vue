@@ -73,14 +73,14 @@ export default {
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'servidorSeguridad'])
+        ...mapState(['servidorProducto', 'servidorSeguridad'])
     },
     watch: {
         cargoSeleccionado : async function () {
             const self = this
                 this.model.id = this.cargoSeleccionado
                 console.log('id ' + this.model.id)
-                const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
+                const datos = (await axios.get(this.servidorProducto + 'usuarios/cargos/'+self.model.id)).data.data
                 this.model = {
                     ...datos
                 }
@@ -134,7 +134,7 @@ export default {
         },
         async asignarPermisos () {
             const self = this
-            axios.put(this.servidorAcceso + 'usuarios/cargos', {
+            axios.put(this.servidorProducto + 'usuarios/cargos', {
                 ...self.model,
                 permisos: self.model.permisos
             }).then(response => (
@@ -150,7 +150,7 @@ export default {
             this.verModal = value
         },
         async apiCargos () {
-            const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            const c = (await axios.get(this.servidorProducto + '/usuarios/cargos')).data.data
             const self = this
             c.forEach(function (cargo) {
                 const aux = {
@@ -163,14 +163,14 @@ export default {
             })
         },
         async apiProductos () {
-            this.productos = (await axios.get(this.servidorAcceso + '/producto/producto')).data.data
+            this.productos = (await axios.get(this.servidorProducto + '/producto/producto')).data.data
         },
         crearMarca () {
             this.$router.push('marca/registrar')
         },
         eliminarProducto (producto) {
             const self = this
-            axios.delete(this.servidorAcceso + 'producto/producto/' + producto.id)
+            axios.delete(this.servidorProducto + 'producto/producto/' + producto.id)
             .then(response => {
                 this.$toast.success({
                     title: 'Eliminación Exitosa',
@@ -187,7 +187,7 @@ export default {
         },
         agregarItem (informacion) {
             const self = this
-            axios.post(this.servidorAcceso + '/producto/producto', {
+            axios.post(this.servidorProducto + '/producto/producto', {
                 ...informacion
             })
             .then(response => {

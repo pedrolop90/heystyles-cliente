@@ -136,7 +136,7 @@ import 'vue-simple-suggest/dist/styles.css'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'proveedor']),
+        ...mapState(['servidorProducto', 'proveedor']),
         validarMarcaSeleccionada () {
             if (this.marcaSeleccionada === '' ) {
                 return false
@@ -185,7 +185,7 @@ import 'vue-simple-suggest/dist/styles.css'
                 })
                 return
             }
-            const marcasDelProducto = (await axios.get(this.servidorAcceso + '/producto/producto/' + this.model.producto.id + '/marcas')).data.data
+            const marcasDelProducto = (await axios.get(this.servidorProducto + '/producto/producto/' + this.model.producto.id + '/marcas')).data.data
             const self = this
             const listaIdMarcas = []
             let repetida = false
@@ -205,7 +205,7 @@ import 'vue-simple-suggest/dist/styles.css'
                 return 
             }
             listaIdMarcas.push(self.marcaSeleccionada)
-            axios.put(this.servidorAcceso + 'producto/producto', {
+            axios.put(this.servidorProducto + 'producto/producto', {
                 ...this.model,
                 marcas: listaIdMarcas
             })
@@ -295,11 +295,11 @@ import 'vue-simple-suggest/dist/styles.css'
             console.log(this.model)
         },
         async apiProductos () {
-            this.itemsProductos = (await axios.get(this.servidorAcceso + '/producto/producto')).data.data
+            this.itemsProductos = (await axios.get(this.servidorProducto + '/producto/producto')).data.data
         },
         async apiMarcas () {
             this.marcas = []
-            const m = (await axios.get(this.servidorAcceso + '/producto/marca')).data.data
+            const m = (await axios.get(this.servidorProducto + '/producto/marca')).data.data
             const self = this
             m.forEach(function (marca) {
                 const aux = {

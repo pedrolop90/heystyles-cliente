@@ -69,14 +69,14 @@ export default {
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'servidorSeguridad'])
+        ...mapState(['servidorProducto', 'servidorSeguridad'])
     },
     watch: {
         cargoSeleccionado : async function () {
             const self = this
                 this.model.id = this.cargoSeleccionado
                 console.log('id ' + this.model.id)
-                const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
+                const datos = (await axios.get(this.servidorProducto + 'usuarios/cargos/'+self.model.id)).data.data
                 this.model = {
                     ...datos
                 }
@@ -95,7 +95,7 @@ export default {
         },
         async asignarPermisos () {
             const self = this
-            axios.put(this.servidorAcceso + 'usuarios/cargos', {
+            axios.put(this.servidorProducto + 'usuarios/cargos', {
                 ...self.model,
                 permisos: self.model.permisos
             }).then(response => (
@@ -111,7 +111,7 @@ export default {
             this.verModal = value
         },
         async apiMarcas () {
-            const m = (await axios.get(this.servidorAcceso + '/producto/marca')).data.data
+            const m = (await axios.get(this.servidorProducto + '/producto/marca')).data.data
             const self = this
             m.forEach(function (marca) {
                 const aux = {
@@ -132,7 +132,7 @@ export default {
         },
         eliminarMarca (marca) {
             const self = this
-            axios.delete(this.servidorAcceso + 'producto/marca/' + marca.id)
+            axios.delete(this.servidorProducto + 'producto/marca/' + marca.id)
             .then(response => {
                 this.$toast.success({
                     title: 'Eliminación Exitosa',
@@ -155,7 +155,7 @@ export default {
             }
             // this.marcas.push(marca)
             const self = this
-            axios.post(this.servidorAcceso + 'producto/marca', {
+            axios.post(this.servidorProducto + 'producto/marca', {
                 ...marca
             })
             .then(response => {

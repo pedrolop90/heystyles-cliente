@@ -8,6 +8,7 @@ export default new Vuex.Store({
     state: {
         servidorSeguridad: 'http://ec2-54-196-82-212.compute-1.amazonaws.com:9000/seguridad/',
         servidorAcceso: 'http://ec2-54-196-82-212.compute-1.amazonaws.com:9010/',
+        servidorProducto: 'http://ec2-54-196-82-212.compute-1.amazonaws.com:9030/',
         menu: undefined,
         usuarios: [
             {
