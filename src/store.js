@@ -6,8 +6,8 @@ import axios from 'axios'
 Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
-        servidorSeguridad: 'http://ec2-3-84-146-56.compute-1.amazonaws.com:9000/seguridad/',
-        servidorAcceso: 'http://ec2-3-84-146-56.compute-1.amazonaws.com:9010/',
+        servidorSeguridad: 'http://ec2-54-196-82-212.compute-1.amazonaws.com:9000/seguridad/',
+        servidorAcceso: 'http://ec2-54-196-82-212.compute-1.amazonaws.com:9010/',
         menu: undefined,
         usuarios: [
             {
