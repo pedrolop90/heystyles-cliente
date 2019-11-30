@@ -7,221 +7,40 @@
                         <div slot="header" class="bg-white border-0">
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h3 class="mb-0">Registro de Facturas</h3>
+                                    <h3 class="mb-0">Gestionar Item de Producto</h3>
                                 </div>
                             </div>
                         </div>
                         <template>
-                            <form @submit.prevent>
-                                <h6 class="heading-small text-muted mb-4">Información de la Factura</h6>
-                                <div class="pl-lg-4">
-                                    <div class="row">
-                                        <div class="col-lg-4">
-                                            <base-input label="Proveedor" :valid="validarProveedor">
-                                                <select class="form-control" v-model="model.proveedorId">
-                                                    <option v-for="item in proveedores" :key="item.id" :value="item.id" >{{ item.nombre }}</option>
-                                                </select>
-                                            </base-input>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Fecha Limite de Vencimiento"
-                                                        placeholder="Fecha Limite de Vencimiento"
-                                                        input-classes="form-control-alternative"
-                                                        :valid="validarFechaVencimiento">
-                                                <flat-picker slot-scope="{focus, blur}"
-                                                            @on-open="focus"
-                                                            @on-close="blur"
-                                                            :config="{allowInput: true}"
-                                                            class="form-control datepicker"
-                                                            v-model="model.fechaVencimiento">
-                                                </flat-picker>
-                                            </base-input>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                label="Esta Pago?"
-                                                input-classes="form-control-alternative">
-                                                    <b-form-checkbox switch size="lg" class="py-2" />
-                                                </base-input>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-                                <h6 class="heading-small text-muted mb-4">Lista de Productos</h6>
-                                <div class="pl-lg-4">
-                                    <div class="row">
-                                        <div class="col-lg-9">
-                                            <base-input alternative=""
-                                                label="Producto"
-                                                input-classes="form-control-alternative">
-                                                <vue-suggest
-                                                    v-model="autocomplete"
-                                                    :list="itemsProductos"
-                                                    :filter-by-query="true"
-                                                    :max-suggestions="10"
-                                                    :min-length="3"
-                                                    value-attribute="id"
-                                                    display-attribute="producto.nombre"
-                                                    @select="seleccionar">
-                                                <template slot="misc-item-above" slot-scope="{ suggestions, query }">
-                                                    <template v-if="suggestions.length > 0">
-                                                        <p><em>Total de Sugerencias: {{ suggestions.length }}</em></p>
-                                                    </template>
-                                                    <div class="misc-item" v-else-if="!loading">
-                                                        <span>Sin resultados</span>
-                                                    </div>
-                                                </template>
-                                                <div slot="suggestion-item" slot-scope="item" :title="item.suggestion.nombre">
-                                                    <span>{{ item.suggestion.producto.nombre }}(<em> {{item.suggestion.marca.nombre}} </em>)</span>
-                                                    <base-button size="sm" type="primary" class="float-right px-2" @click.stop="agregar(item.suggestion)">Agregar</base-button>
-                                                </div>
-                                                </vue-suggest>
-                                            </base-input>
-                                        </div>
-                                        <div class="col-lg-4" v-if="mostrarSelectorMarca">
-                                            <base-input label="Marcas" :valid="validarMarca">
-                                                <select class="form-control" v-model="itemSeleccionadoAutocomplete.idMarca">
-                                                    <option v-for="item in marcas" :key="item.idMarca" :value="item" >{{ item.nombre }}</option>
-                                                </select>
-                                            </base-input>
-                                        </div>
-                                        <div class="col-lg-4"  v-if="mostrarSelectorMarca">
-                                            <div class="row float-right" >
-                                                <base-button outline @click="agregarProducto()" type="success">AgregarProducto</base-button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <b-table striped hover selectable :fields="camposTablaItemsProducto" :items="model.productos" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single">
-                                        <template slot="quitar" slot-scope="data">
-                                            <b-button
-                                                variant="outline-warning"
-                                                size="sm"
-                                                v-b-popover.hover.top="'Quitar el Producto'"
-                                                @click="quitarProducto(data.item.id)"
-                                            >
-                                                X
-                                            </b-button>
-                                        </template> 
-                                        <template slot="cantidad" slot-scope="data">
-                                            <b-form-input 
-                                                alternative=""
-                                                type="number"
-                                                input-classes="form-control-sm"
-                                                v-model="data.item.cantidad"
-                                                min= 0
-                                                max= 100000
-                                                size="sm"
-                                                style="min-width: 70px !important"
-                                                :state="validarCantidad(data.item.cantidad)"
-                                                @blur="calcularTotalFactura"
-                                            />
-                                        </template> 
-                                        <template slot="valor" slot-scope="data">
-                                            <b-form-input
-                                                alternative=""
-                                                type="number"
-                                                input-classes="form-control-sm"
-                                                v-model="data.item.valor"
-                                                min= 0
-                                                max= 10000000
-                                                style="min-width: 100px !important"
-                                                size="sm"
-                                                :state="validarPrecio(data.item.valor)"
-                                                @blur="calcularTotalFactura"
-                                            />
+                            <div>
+                                <h6 class="heading-small text-muted mb-4">Lista de Items</h6>
+
+                                
+                                <b-table striped hover small :fields="columnasItem" :items="productos" v-if="verTabla">
+                                        <template slot="Editar" slot-scope="data">
+                                            <modificar-item :verModal="data.item.editar" :unidadesMedidaProp="unidadesMedida" :producto="data.item" @esActivo="data.item.editar = true" @esInactivo="data.item.editar = false" @modificarItem="modificarItem"/>
+                                            <base-button outline type="secondary" @click="data.item.editar = true" >
+                                                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                                Editar
+                                            </base-button>
                                         </template>
-                                        <template slot="porcentajeDescuento" slot-scope="data">
-                                            <b-form-input
-                                                :state="validarDescuento(data.item.porcentajeDescuento)"
-                                                type="number"
-                                                style="min-width: 50px !important"
-                                                min= 0
-                                                max= 100
-                                                v-model="data.item.porcentajeDescuento"
-                                                size="sm"
-                                                @blur="calcularTotalFactura"
-                                            />
+                                        <template slot="Eliminar" slot-scope="data">
+                                            <base-button
+                                                outline
+                                                type="warning"
+                                                @click="eliminarProducto(data.item)"
+                                                v-b-popover.hover.top="'Eliminar Producto'">
+                                                <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
+                                            </base-button>
                                         </template>
-                                        <template slot="nombre" slot-scope="data">
-                                            {{data.item.nombre}} (<em>{{ data.item.marca.nombre }}</em>)
-                                        </template>
-                                        <template slot="unidadMedida" slot-scope="data">
-                                            {{ data.item.unidadMedida.nombre }}
-                                        </template>
-                                        <template slot="Total" slot-scope="data">
-                                            <b-form-input
-                                                disabled
-                                                type="number"
-                                                input-classes="form-control-alternative"
-                                                size="sm"
-                                                style="min-width: 120px !important"
-                                                :value="(data.item.valor*data.item.cantidad)
-                                                -(data.item.valor*data.item.cantidad)
-                                                *data.item.porcentajeDescuento/100"
-                                            />
-                                        </template>
-                                    </b-table>
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label for="input-small">Iva:</label>
-                                        </div>
-                                        <div class="col-lg-2">
-                                            <b-form-input
-                                                disabled
-                                                alternative=""
-                                                type="number"
-                                                label="Valor Total"
-                                                input-classes="form-control-alternative"
-                                                v-model="model.porcentaje"
-                                                min= 0
-                                                max= 1000
-                                                size="sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label for="input-small">Sub-Total:</label>
-                                        </div>
-                                        <div class="col-lg-2">
-                                            <b-form-input
-                                                disabled
-                                                alternative=""
-                                                type="number"
-                                                label="Valor Total"
-                                                input-classes="form-control-alternative"
-                                                v-model="model.subTotal"
-                                                min= 0
-                                                max= 1000
-                                                size="sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-lg-2">
-                                            <label for="input-small">Total:</label>
-                                        </div>
-                                        <div class="col-lg-2">
-                                            <b-form-input
-                                                disabled
-                                                alternative=""
-                                                type="number"
-                                                label="Valor Total"
-                                                input-classes="form-control-alternative"
-                                                v-model="model.valorTotal"
-                                                min= 0
-                                                max= 1000
-                                                size="sm"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div class="row float-right" >
-                                        <base-button outline @click="registrar()" type="success">Registrar</base-button>
-                                    </div>
-                                </div>
-                            </form>
+                                </b-table>
+                            </div>
+                            <div class="text-right" >
+                                <base-button outline type="secondary" @click="crearFactura()" >
+                                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                    Crear Factura
+                                </base-button>
+                            </div>
                         </template>
                     </card>
                 </div>
@@ -230,206 +49,140 @@
     </div>
 </template>
 <script>
-const PROVEEDORES = [
-    { id: '1', nombre: 'NIKE',  text: 'NIKE', value: '1', fechaLimitePago: 10},
-    { id: '2', nombre: 'ADIDAS',  text: 'ADIDAS', value: '2', fechaLimitePago: 45},
-    { id: '3', nombre: 'TREFILADOS',  text: 'TREFILADOS', value: '3', fechaLimitePago: 30},
-    { id: '4', nombre: 'IMPORTADO',  text: 'IMPORTADO', value: '4', fechaLimitePago: 45},
-    { id: '5', nombre: 'COMPAT',  text: 'COMPAT', value: '5', fechaLimitePago: 10},
-    { id: '6', nombre: 'CENTOS',  text: 'CENTOS', value: '6', fechaLimitePago: 0}
-]
-import 'flatpickr/dist/flatpickr.css'
-import flatPicker from 'vue-flatpickr-component'
 import {mapState} from 'vuex'
 import axios from 'axios'
-import moment from 'moment'
-/* https://vuejsexamples.com/simple-yet-feature-rich-autocomplete-component-for-vue-js/ */
-import VueSuggest from 'vue-simple-suggest'
-import 'vue-simple-suggest/dist/styles.css'
-  export default {
+import RegistrarFactura from './registrar.vue'
+export default {
     components: {
-        flatPicker,
-        VueSuggest
+        RegistrarFactura,
     },
-    name: 'RegistrarProducto',
     data() {
       return {
-        autocomplete: '',
-        loading: false,
         model: {
-            id: null,
-            fechaVencimiento: moment().format('YYYY-MM-DD'),
-            proveedorId: undefined,
-            productos: [],
-            valorTotal: 0,
-            porcentajeDescuento: 0,
-            porcentaje: 0,
-            subTotal: 0
+            id: '',
+            nombre: '',
         },
-        iva: 19,
+        columnasItem: [
+            { key: 'id', label: 'Codigo' },
+            { key: 'nombreProveedor', label: 'Proveedor' },
+            { key: 'fechaLimitePago', label: 'Fecha Limite' },
+            { key: 'valorTotal', label: 'Total' },
+        ],
         verModal: false,
-        verModalContacto: false,
-        camposTablaCuentaBanco: [
-            { key: 'nombreBanco', label: 'Nombre del Banco' },
-            { key: 'tipoCuenta', label: 'Tipo de Cuenta' },
-            { key: 'numeroCuenta', label: 'Numero de Cuenta' },
-            'Quitar'
-        ],
-        camposTablaItemsProducto: [
-            {key: 'nombre', label: 'Nombre'},
-            {key: 'unidadMedida', label: 'Unidad'},
-            {key: 'estadoEntrada', label: 'Estado'},
-            {key: 'cantidad', label: 'Cant.'},
-            {key: 'porcentajeDescuento', label: 'Desc.'},
-            {key: 'valor', label: 'Precio'},
-            "Total",
-            {key: 'quitar', label: ''},
-        ],
-        proveedores: PROVEEDORES,
-        itemsProductos: [],
-        marcas: [],
-        itemSeleccionadoAutocomplete: {},
-        mostrarSelectorMarca: false,
+        productos: [],
+        verModalEditar: [],
+        permisos: undefined,
+        marcaSeleccionado: '',
+        unidadesMedida: [],
+        verTabla: false,
+        valor: false
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'servidorProducto', 'proveedor', 'servidorFactura']),
-        validarNombre () {
-            if (this.model.nombre === '' ) {
-                return false
+        ...mapState(['servidorFactura', 'servidorSeguridad'])
+    },
+    watch: {
+        'model.id': {
+            handler: async function () {
+                
             }
-            else if (this.model.nombre === undefined) {
-                return undefined
-            }
-            return true
         },
-        validarMarca () {
-            if (this.model.marca === '' ) {
-                return false
+        'model.permisos': function () {
+            this.mostrarTabla = true
+            this.$refs.tabla.clearSelected()
+            const self = this
+            let index = -1
+            if (this.model.permisos === undefined) {
+                return
             }
-            else if (this.model.marca === undefined) {
-                return undefined
-            }
-            return true
-        },
-        validarValorTotal () {
-            try {
-                if (this.model.valorTotal >= 0 && this.model.valorTotal <= 10000000) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
-        validarProducto () {
-            if (this.model.idProducto === undefined ) {
-                this.$toast.info({
-                    title: 'No se puede registrar el Producto',
-                    message: 'Se debe eligir un producto para registrarlo'
+            this.model.permisos.forEach(function (per) {
+                index = -1
+                const encontrado = self.permisos.find(function (p) {
+                    index++
+                    console.log(p.id + ' - ' + per)
+                    console.log(p.id === per)
+                    if (per === undefined) {
+                        return false
+                    }
+                    return p.id === per
                 })
-                return false
-            }
-            return true
-        },
-        validarProveedor () {
-            if (this.model.proveedorId === undefined ) {
-                return undefined
-            } else if (this.model.proveedorId === '' ) {
-                return false
-            }
-            return true
-        },
-        validarFechaVencimiento () {
-            if (this.model.fechaVencimiento === '' ) {
-                return false
-            }
-            else if (this.model.fechaVencimiento === undefined) {
-                return undefined
-            } else if (moment().isAfter(this.model.fechaVencimiento)) {
-                if (moment().format('YYYY-MM-DD') === this.model.fechaVencimiento) {
-                    return true
+                if (encontrado) {
+                    self.$refs.tabla.selectRow(index)
                 }
-                return false
-            }
-            return true
+            })
         }
     },
     methods: {
-        validarProductos () {
-            if (this.model.productos.length === 0) {
-                this.$toast.info({
-                    title: 'Datos Incompletos',
-                    message: 'Debe agregar almenos un producto'
-                })
-                return false 
-            }
-            const self = this
-            let valoresNoValidos = true
-            this.model.productos.forEach(function(producto, index){
-                console.log(index)
-                if (self.validarPrecios(producto.valor)) {
-                    self.$toast.info({
-                        title: 'Datos Incompletos',
-                        message: 'Existen precios invalidos en los productos'
-                    })
-                    return false
-                } else if (self.validarCantidad(producto.cantidad)) {
-                    self.$toast.info({
-                        title: 'Datos Incompletos',
-                        message: 'Existen cantidades invalidas en los productos'
-                    })
-                    return false
-                } else if (self.validarDescuento(producto.porcentajeDescuento)) {
-                    self.$toast.info({
-                        title: 'Datos Incompletos',
-                        message: 'Existen Descuentos invalidos en los productos'
-                    })
-                    return false
-                }
+        seleccionado (items) {
+            this.model.permisos = []
+            items.forEach(element => {
+                this.model.permisos.push(element.id)
             })
-            console.log('valoresNoValidos ' + valoresNoValidos)
-            return true
+            console.log('seleccionado ' + this.model.permisos)
         },
-        validarPrecios (valor) {
-            try {
-                if (valor >= 0 && valor <= 10000000) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
-        seleccionado (item) {
-            console.log(item[0])
-            this.model.idProducto = item[0].idProducto
-            this.model.nombre = item[0].nombre
-        },
-        async registrar () {
-            if (!this.validacion()) {
-                this.$toast.info({
-                    title: 'No se puede registrar la factura',
-                    message: 'Existen campos vacios o no validos dentro del formulario principal'
-                })
-                return
-            }
-            console.log(this.validarProductos())
-            if (!this.validarProductos()) {
-                return
-            }
+        async asignarPermisos () {
             const self = this
-            axios.post(this.servidorFactura + 'factura/factura', {
-                factura: this.model,
-                gestionProductos: this.model.productos
+            axios.put(this.servidorProducto + 'usuarios/cargos', {
+                ...self.model,
+                permisos: self.model.permisos
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Cargo Actualizado Exitosamente'
+                })
+            ))
+            // this.$store.commit('modificarCargos', cargo)
+            this.$router.push('/usuario/')
+        },
+        esActivo (value) {
+            this.verModal = value
+        },
+        esActivoEditar (value) {
+            console.log(value)
+            //this.verModalEditar = value
+        },
+        async apiCargos () {
+            const c = (await axios.get(this.servidorProducto + '/usuarios/cargos')).data.data
+            const self = this
+            c.forEach(function (cargo) {
+                const aux = {
+                    ...cargo,
+                    text: cargo.nombre,
+                    value: cargo.id
+                }
+                console.log(aux)
+                self.cargos.push(aux)
             })
+        },
+        async apiFacturas () {
+            this.verTabla = false
+            this.productos = []
+            this.verModalEditar = []
+            const self = this
+            const arrayProducto = []
+            this.facturas = (await axios.get(this.servidorFactura + '/factura/factura')).data.data
+            this.facturas.forEach(function (item) {
+                const p = {
+                    ...item.factura,
+                    nombreProveedor: item.proveedor.proveedor.nombre
+                }
+                arrayProducto.push(p)
+            }) 
+            this.productos = arrayProducto
+            this.verTabla = true
+        },
+        crearMarca () {
+            this.$router.push('marca/registrar')
+        },
+        eliminarProducto (producto) {
+            const self = this
+            axios.delete(this.servidorFactura + 'producto/producto/' + producto.id)
             .then(response => {
                 this.$toast.success({
-                    title: 'Registro Exitoso',
-                    message: 'Se registro la Factura correctamente'
+                    title: 'Eliminación Exitosa',
+                    message: 'Se elimino el cargo correctamente'
                 })
-                self.limpiarCampos()
-                this.$router.push('/factura/')
+            self.apiProductos()
             })
             .catch(error => {
                 this.$toast.error({
@@ -438,173 +191,31 @@ import 'vue-simple-suggest/dist/styles.css'
                 })
             })
         },
-        registrarAux() {
-            console.log(this.model)
-            const proveedor = {
-                ...this.model
-            }
-            this.proveedor.push(proveedor)
-            this.$router.push('/proveedor/')
-            this.$toast.success({
-                title: 'Exito',
-                message: 'Se ha registrado el proveedor correctamente'
-            })
-        },
-        esActivo (value) {
-            this.verModal = value
-        },
-        esActivoModalContacto (value) {
-            this.verModalContacto = value
-        },
-        agregarCuenta (informacion) {
-            const cuentaBa = {
-                ...informacion
-            }
-            this.model.cuentaBanco.push(cuentaBa)
-        },
-        agregarContacto (informacion) {
-            const contacto = {
-                ...informacion
-            }
-            this.model.contacto.push(contacto)
-        },
-        quitarProducto (idQuitar) {
-            const aux = []
-            this.model.productos.forEach(function (producto) {
-                if (producto.id !== idQuitar) {
-                    aux.push(producto)
-                }
-            })
-            this.model.productos = aux
-        },
-        validacion () {
-            console.log(this.validarProveedor)
-            console.log(this.validarFechaVencimiento)
-            if (this.validarProveedor && this.validarFechaVencimiento) {
-                return true
-            }
-            return false
-        },
-        agregar (suggest) {
-            this.itemSeleccionadoAutocomplete = {
-                nombre: suggest.producto.nombre,
-                id: suggest.id,
-                marcaProductoId: suggest.marca.id,
-                marca: suggest.marca,
-                estadoEntrada: "MAL_ESTADO",
-                unidadMedida: suggest.producto.unidadMedida,
-                cantidad: undefined,
-                porcentajeDescuento: 0,
-                valor: 0,
-                total: 0
-            }
-            this.agregarProducto ()
-        },
-        seleccionar (suggest, e) {
-            this.itemSeleccionadoAutocomplete = {
-                nombre: suggest.producto.nombre,
-                id: suggest.id,
-                marcaProductoId: suggest.marca.id,
-                marca: suggest.marca,
-                estadoEntrada: "MAL_ESTADO",
-                unidadMedida: suggest.producto.unidadMedida,
-                cantidad: 0,
-                porcentajeDescuento: 0,
-                valor: 0,
-                total: 0
-            }
-            this.agregarProducto ()
-        },
-        agregarProducto () {
-            this.model.productos.push(this.itemSeleccionadoAutocomplete)
-            this.itemSeleccionadoAutocomplete = {}
-            this.mostrarSelectorMarca = false
-            this.autocomplete = ''
-        },
-        validarPrecio (valor) {
-            try {
-                if (valor === '') {
-                    return false
-                }
-                if (valor >= 0 && valor <= 10000000) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
-        validarDescuento (valor) {
-            try {
-                if (valor === '') {
-                    return false
-                }
-                if (valor >= 0 && valor <= 100) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
-        validarCantidad (valor) {
-            try {
-                if (valor === '' || valor === undefined ) {
-                    return false
-                }
-                if (valor > 0 && valor <= 10000) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
-        async apiProductos () {
-            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
-        },
-        async listarProdedores () {
-            this.proveedores = []
-            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores')).data.data
-        },
-        calcularTotalFactura () {
-            if (this.model.productos.length === 0) {
-                this.model.valor = 0
-                this.model.subTotal = 0
-                return
-            }
+        modificarItem (informacion) {
             const self = this
-            this.model.valor = 0
-            self.model.valorTotal = 0
-            this.model.productos.forEach(function (producto) {
-                const valor = (producto.valor * producto.cantidad)
-                    - (producto.valor * producto.cantidad) * producto.porcentajeDescuento / 100
-                self.model.valorTotal += valor
+            axios.post(this.servidorProducto + '/producto/producto', {
+                ...informacion
             })
+            .then(response => {
+                this.$toast.success({
+                    title: 'Registro Exitoso',
+                    message: 'Se creo el Item correctamente'
+                })
+                self.apiProductos()
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+        },
+        crearFactura () {
+            this.$router.push('/factura/registrar')
         }
     },
-    watch: {
-        'model.proveedorId' () {
-            const self = this
-            const proveedorFiltrado = this.proveedores.find(function (proveedor) {
-                return proveedor.id === self.model.proveedorId
-            })
-            const hoy = moment().add('days', proveedorFiltrado.fechaLimitePago)
-            this.model.fechaVencimiento = hoy.format('YYYY-MM-DD')
-        },
-        'model.productos' () {
-            this.calcularTotalFactura()
-        },
-        'model.valorTotal' () {
-            this.model.subTotal = this.model.valorTotal/1.19
-            this.model.porcentaje = this.model.subTotal*0.19
-        }
-    },
-    created: function() {
-        this.apiProductos()
-        this.listarProdedores()
+    created () {
+        this.apiFacturas()
     }
-  }
+}
 </script>
-<style>
-</style>
