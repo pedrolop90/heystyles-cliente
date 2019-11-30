@@ -14,7 +14,16 @@
                         <template>
                             <div>
                                 <h6 class="heading-small text-muted mb-4">Lista de Items</h6>
-                                <b-table hover small striped :fields="columnasItem" :items="productos">
+
+                                
+                                <b-table striped hover small :fields="columnasItem" :items="productos" v-if="verTabla">
+                                        <template slot="Editar" slot-scope="data">
+                                            <modificar-item :verModal="data.item.editar" :unidadesMedidaProp="unidadesMedida" :producto="data.item" @esActivo="data.item.editar = true" @esInactivo="data.item.editar = false" @modificarItem="modificarItem"/>
+                                            <base-button outline type="secondary" @click="data.item.editar = true" >
+                                                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                                Editar
+                                            </base-button>
+                                        </template>
                                         <template slot="Eliminar" slot-scope="data">
                                             <base-button
                                                 outline
@@ -31,7 +40,7 @@
                             </div>
                             <div class="text-right" >
                                 <registrar-item :verModal="verModal" @esActivo="esActivo" @agregarItem="agregarItem"/>
-                                    <base-button outline type="secondary" @click="verModal = true" >
+                                <base-button outline type="secondary" @click="verModal = true" >
                                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                                     Crear Item de Producto
                                 </base-button>
@@ -47,9 +56,11 @@
 import {mapState} from 'vuex'
 import axios from 'axios'
 import RegistrarItem from './registrar.vue'
+import ModificarItem from './modificar.vue'
 export default {
     components: {
-        RegistrarItem
+        RegistrarItem,
+        ModificarItem
     },
     data() {
       return {
@@ -61,15 +72,20 @@ export default {
             { key: 'nombre', label: 'Nombre' },
             { key: 'stockMinimo', label: 'Stock Minimo' },
             { key: 'unidadMedida', label: 'Unidad de Medidad' },
+            'Editar',
             'Eliminar'
         ],
         verModal: false,
+        verModalEditar: [],
         productos: [
             { nombre: 'Pegante Super 200 ml amarillo', descripcion: 'Pegante Super 200 ml amarillo', unidadMedida: 'ML', stockMinimo: '50' },
             { nombre: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', descripcion: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', unidadMedida: 'MTR', stockMinimo: '100' }
         ],
         permisos: undefined,
-        marcaSeleccionado: ''
+        marcaSeleccionado: '',
+        unidadesMedida: [],
+        verTabla: false,
+        valor: false
       }
     },
     computed: {
@@ -149,6 +165,10 @@ export default {
         esActivo (value) {
             this.verModal = value
         },
+        esActivoEditar (value) {
+            console.log(value)
+            //this.verModalEditar = value
+        },
         async apiCargos () {
             const c = (await axios.get(this.servidorProducto + '/usuarios/cargos')).data.data
             const self = this
@@ -163,7 +183,21 @@ export default {
             })
         },
         async apiProductos () {
+            this.verTabla = false
+            this.verModalEditar = []
+            const self = this
+            const arrayProducto = []
             this.productos = (await axios.get(this.servidorProducto + '/producto/producto')).data.data
+            this.productos.forEach(function (item) {
+                const p = {
+                    ...item,
+                    editar: false,
+                    unidadMedidaId: item.unidadMedida.id
+                }
+                arrayProducto.push(p)
+            })
+            this.productos = arrayProducto
+            this.verTabla = true
         },
         crearMarca () {
             this.$router.push('marca/registrar')
@@ -187,6 +221,25 @@ export default {
         },
         agregarItem (informacion) {
             const self = this
+            axios.put(this.servidorProducto + '/producto/producto', {
+                ...informacion
+            })
+            .then(response => {
+                this.$toast.success({
+                    title: 'Modificacion Exitosa',
+                    message: 'Se modifico el Item correctamente'
+                })
+                self.apiProductos()
+            })
+            .catch(error => {
+                this.$toast.error({
+                    title: error.response.data.message,
+                    message: error.response.data.errors[0].message
+                })
+            })
+        },
+        modificarItem (informacion) {
+            const self = this
             axios.post(this.servidorProducto + '/producto/producto', {
                 ...informacion
             })
@@ -204,9 +257,22 @@ export default {
                 })
             })
         },
+        async apiUnidadesMedidas () {
+            this.unidadesMedida = []
+            const u = (await axios.get(this.servidorProducto + '/producto/unidad-medida')).data.data
+            const self = this
+            console.log(u)
+            u.forEach(function (medida) {
+                const aux = {
+                    ...medida
+                }
+                self.unidadesMedida.push(aux)
+            })
+        }
     },
     created () {
         this.apiProductos()
+        this.apiUnidadesMedidas()
     }
 }
 </script>

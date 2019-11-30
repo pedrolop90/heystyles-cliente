@@ -18,8 +18,8 @@
                                     <div class="row">
                                         <div class="col-lg-4">
                                             <base-input label="Proveedor" :valid="validarProveedor">
-                                                <select class="form-control" v-model="model.idProveedor">
-                                                    <option v-for="item in proveedores" :key="item.idProveedor" :value="item.idProveedor" >{{ item.nombre }}</option>
+                                                <select class="form-control" v-model="model.proveedorId">
+                                                    <option v-for="item in proveedores" :key="item.id" :value="item.id" >{{ item.nombre }}</option>
                                                 </select>
                                             </base-input>
                                         </div>
@@ -61,9 +61,8 @@
                                                     :filter-by-query="true"
                                                     :max-suggestions="10"
                                                     :min-length="3"
-                                                    value-attribute="idProducto"
-                                                    display-attribute="nombre"
-                                                    @suggestion-click="seleccionar"
+                                                    value-attribute="id"
+                                                    display-attribute="producto.nombre"
                                                     @select="seleccionar">
                                                 <template slot="misc-item-above" slot-scope="{ suggestions, query }">
                                                     <template v-if="suggestions.length > 0">
@@ -74,7 +73,7 @@
                                                     </div>
                                                 </template>
                                                 <div slot="suggestion-item" slot-scope="item" :title="item.suggestion.nombre">
-                                                    <span>{{item.suggestion.nombre}}</span>
+                                                    <span>{{ item.suggestion.producto.nombre }}(<em> {{item.suggestion.marca.nombre}} </em>)</span>
                                                     <base-button size="sm" type="primary" class="float-right px-2" @click.stop="agregar(item.suggestion)">Agregar</base-button>
                                                 </div>
                                                 </vue-suggest>
@@ -94,45 +93,130 @@
                                         </div>
                                     </div>
                                     <b-table striped hover selectable :fields="camposTablaItemsProducto" :items="model.productos" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single">
+                                        <template slot="quitar" slot-scope="data">
+                                            <b-button
+                                                variant="outline-warning"
+                                                size="sm"
+                                                v-b-popover.hover.top="'Quitar el Producto'"
+                                                @click="quitarProducto(data.item.id)"
+                                            >
+                                                X
+                                            </b-button>
+                                        </template> 
                                         <template slot="cantidad" slot-scope="data">
-                                            <base-input 
+                                            <b-form-input 
                                                 alternative=""
                                                 type="number"
-                                                placeholder="Cantidad"
                                                 input-classes="form-control-sm"
                                                 v-model="data.item.cantidad"
                                                 min= 0
-                                                max= 10000000
-                                                :valid="validarCantidad(data.item.cantidad)"
+                                                max= 100000
+                                                size="sm"
+                                                style="min-width: 70px !important"
+                                                :state="validarCantidad(data.item.cantidad)"
+                                                @blur="calcularTotalFactura"
                                             />
                                         </template> 
                                         <template slot="valor" slot-scope="data">
-                                            <base-input 
+                                            <b-form-input
                                                 alternative=""
                                                 type="number"
-                                                placeholder="Valor"
                                                 input-classes="form-control-sm"
                                                 v-model="data.item.valor"
                                                 min= 0
                                                 max= 10000000
-                                                :valid="validarPrecio(data.item.valor)"
+                                                style="min-width: 100px !important"
+                                                size="sm"
+                                                :state="validarPrecio(data.item.valor)"
+                                                @blur="calcularTotalFactura"
                                             />
-                                        </template>  
+                                        </template>
+                                        <template slot="porcentajeDescuento" slot-scope="data">
+                                            <b-form-input
+                                                :state="validarDescuento(data.item.porcentajeDescuento)"
+                                                type="number"
+                                                style="min-width: 50px !important"
+                                                min= 0
+                                                max= 100
+                                                v-model="data.item.porcentajeDescuento"
+                                                size="sm"
+                                                @blur="calcularTotalFactura"
+                                            />
+                                        </template>
+                                        <template slot="nombre" slot-scope="data">
+                                            {{data.item.nombre}} (<em>{{ data.item.marca.nombre }}</em>)
+                                        </template>
+                                        <template slot="unidadMedida" slot-scope="data">
+                                            {{ data.item.unidadMedida.nombre }}
+                                        </template>
+                                        <template slot="Total" slot-scope="data">
+                                            <b-form-input
+                                                disabled
+                                                type="number"
+                                                input-classes="form-control-alternative"
+                                                size="sm"
+                                                style="min-width: 120px !important"
+                                                :value="(data.item.valor*data.item.cantidad)
+                                                -(data.item.valor*data.item.cantidad)
+                                                *data.item.porcentajeDescuento/100"
+                                            />
+                                        </template>
                                     </b-table>
                                     <hr>
-                                    <div class="col-lg-4">
-                                            <base-input 
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label for="input-small">Iva:</label>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <b-form-input
+                                                disabled
                                                 alternative=""
                                                 type="number"
                                                 label="Valor Total"
-                                                placeholder="Valor Total de la factura"
+                                                input-classes="form-control-alternative"
+                                                v-model="model.porcentaje"
+                                                min= 0
+                                                max= 1000
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label for="input-small">Sub-Total:</label>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <b-form-input
+                                                disabled
+                                                alternative=""
+                                                type="number"
+                                                label="Valor Total"
+                                                input-classes="form-control-alternative"
+                                                v-model="model.subTotal"
+                                                min= 0
+                                                max= 1000
+                                                size="sm"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-2">
+                                            <label for="input-small">Total:</label>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <b-form-input
+                                                disabled
+                                                alternative=""
+                                                type="number"
+                                                label="Valor Total"
                                                 input-classes="form-control-alternative"
                                                 v-model="model.valorTotal"
                                                 min= 0
                                                 max= 1000
-                                                :valid="validarValorTotal"
+                                                size="sm"
                                             />
                                         </div>
+                                    </div>
                                     <div class="row float-right" >
                                         <base-button outline @click="registrar()" type="success">Registrar</base-button>
                                     </div>
@@ -147,12 +231,12 @@
 </template>
 <script>
 const PROVEEDORES = [
-    { idProveedor: '1', nombre: 'NIKE',  text: 'NIKE', value: '1', fechaLimitePago: 10},
-    { idProveedor: '2', nombre: 'ADIDAS',  text: 'ADIDAS', value: '2', fechaLimitePago: 45},
-    { idProveedor: '3', nombre: 'TREFILADOS',  text: 'TREFILADOS', value: '3', fechaLimitePago: 30},
-    { idProveedor: '4', nombre: 'IMPORTADO',  text: 'IMPORTADO', value: '4', fechaLimitePago: 45},
-    { idProveedor: '5', nombre: 'COMPAT',  text: 'COMPAT', value: '5', fechaLimitePago: 10},
-    { idProveedor: '6', nombre: 'CENTOS',  text: 'CENTOS', value: '6', fechaLimitePago: 0}
+    { id: '1', nombre: 'NIKE',  text: 'NIKE', value: '1', fechaLimitePago: 10},
+    { id: '2', nombre: 'ADIDAS',  text: 'ADIDAS', value: '2', fechaLimitePago: 45},
+    { id: '3', nombre: 'TREFILADOS',  text: 'TREFILADOS', value: '3', fechaLimitePago: 30},
+    { id: '4', nombre: 'IMPORTADO',  text: 'IMPORTADO', value: '4', fechaLimitePago: 45},
+    { id: '5', nombre: 'COMPAT',  text: 'COMPAT', value: '5', fechaLimitePago: 10},
+    { id: '6', nombre: 'CENTOS',  text: 'CENTOS', value: '6', fechaLimitePago: 0}
 ]
 import 'flatpickr/dist/flatpickr.css'
 import flatPicker from 'vue-flatpickr-component'
@@ -173,12 +257,16 @@ import 'vue-simple-suggest/dist/styles.css'
         autocomplete: '',
         loading: false,
         model: {
-            idProducto: undefined,
+            id: null,
             fechaVencimiento: moment().format('YYYY-MM-DD'),
-            idProveedor: undefined,
+            proveedorId: undefined,
             productos: [],
-            valorTotal: 0
+            valorTotal: 0,
+            porcentajeDescuento: 0,
+            porcentaje: 0,
+            subTotal: 0
         },
+        iva: 19,
         verModal: false,
         verModalContacto: false,
         camposTablaCuentaBanco: [
@@ -189,24 +277,23 @@ import 'vue-simple-suggest/dist/styles.css'
         ],
         camposTablaItemsProducto: [
             {key: 'nombre', label: 'Nombre'},
-            {key: 'idMarca', label: 'Marca'},
             {key: 'unidadMedida', label: 'Unidad'},
-            {key: 'cantidad', label: 'Cantidad'},
-            {key: 'valor', label: 'Valor'},
+            {key: 'estadoEntrada', label: 'Estado'},
+            {key: 'cantidad', label: 'Cant.'},
+            {key: 'porcentajeDescuento', label: 'Desc.'},
+            {key: 'valor', label: 'Precio'},
+            "Total",
+            {key: 'quitar', label: ''},
         ],
         proveedores: PROVEEDORES,
-        itemsProductos: [
-            { idProducto: 1, nombre: 'Pegante Super 200 ml amarillo', descripcion: 'Pegante Super 200 ml amarillo', unidadMedida: 'ML', stockMinimo: '50', marcas: [{ nombre: 'NIKE', idMarca: '10'},{idMarca: '20', nombre: 'ADIDAS' }] },
-            { idProducto: 2, nombre: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', descripcion: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', unidadMedida: 'MTR', stockMinimo: '100', marcas: [{idMarca: '2', nombre:'DESCONOCIDA'}, {idMarca: '1', nombre:'CHIMBA'}] },
-            { idProducto: 3, nombre: 'Puntilla cuadrada para clavar Bareque', descripcion: 'Puntilla cuadrada para clavar Bareque de 4 punlgadas', unidadMedida: 'GR', stockMinimo: '100', marcas: [{idMarca: '20', nombre:'GENERICA'}] }
-        ],
+        itemsProductos: [],
         marcas: [],
         itemSeleccionadoAutocomplete: {},
-        mostrarSelectorMarca: false
+        mostrarSelectorMarca: false,
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'proveedor']),
+        ...mapState(['servidorAcceso', 'servidorProducto', 'proveedor', 'servidorFactura']),
         validarNombre () {
             if (this.model.nombre === '' ) {
                 return false
@@ -235,16 +322,6 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             return false
         },
-        validarPrecios (valor) {
-            try {
-                if (valor >= 0 && valor <= 10000000) {
-                    return true
-                }
-            } catch (error) {
-                return false
-            }
-            return false
-        },
         validarProducto () {
             if (this.model.idProducto === undefined ) {
                 this.$toast.info({
@@ -256,9 +333,9 @@ import 'vue-simple-suggest/dist/styles.css'
             return true
         },
         validarProveedor () {
-            if (this.model.idProveedor === undefined ) {
+            if (this.model.proveedorId === undefined ) {
                 return undefined
-            } else if (this.model.idProveedor === '' ) {
+            } else if (this.model.proveedorId === '' ) {
                 return false
             }
             return true
@@ -279,35 +356,80 @@ import 'vue-simple-suggest/dist/styles.css'
         }
     },
     methods: {
+        validarProductos () {
+            if (this.model.productos.length === 0) {
+                this.$toast.info({
+                    title: 'Datos Incompletos',
+                    message: 'Debe agregar almenos un producto'
+                })
+                return false 
+            }
+            const self = this
+            let valoresNoValidos = true
+            this.model.productos.forEach(function(producto, index){
+                console.log(index)
+                if (self.validarPrecios(producto.valor)) {
+                    self.$toast.info({
+                        title: 'Datos Incompletos',
+                        message: 'Existen precios invalidos en los productos'
+                    })
+                    return false
+                } else if (self.validarCantidad(producto.cantidad)) {
+                    self.$toast.info({
+                        title: 'Datos Incompletos',
+                        message: 'Existen cantidades invalidas en los productos'
+                    })
+                    return false
+                } else if (self.validarDescuento(producto.porcentajeDescuento)) {
+                    self.$toast.info({
+                        title: 'Datos Incompletos',
+                        message: 'Existen Descuentos invalidos en los productos'
+                    })
+                    return false
+                }
+            })
+            console.log('valoresNoValidos ' + valoresNoValidos)
+            return true
+        },
+        validarPrecios (valor) {
+            try {
+                if (valor >= 0 && valor <= 10000000) {
+                    return true
+                }
+            } catch (error) {
+                return false
+            }
+            return false
+        },
         seleccionado (item) {
             console.log(item[0])
             this.model.idProducto = item[0].idProducto
             this.model.nombre = item[0].nombre
         },
         async registrar () {
-            if (!this.validarProducto) {
-                return
-            }
             if (!this.validacion()) {
                 this.$toast.info({
-                    title: 'No se puede registrar el proveedor',
+                    title: 'No se puede registrar la factura',
                     message: 'Existen campos vacios o no validos dentro del formulario principal'
                 })
                 return
             }
+            console.log(this.validarProductos())
+            if (!this.validarProductos()) {
+                return
+            }
             const self = this
-            axios.post(this.servidorAcceso + 'usuarios/proveedores', {
-                proveedor: this.model,
-                contactos: this.model.contacto,
-                cuentasBanco: this.model.cuentaBanco
+            axios.post(this.servidorFactura + 'factura/factura', {
+                factura: this.model,
+                gestionProductos: this.model.productos
             })
             .then(response => {
                 this.$toast.success({
                     title: 'Registro Exitoso',
-                    message: 'Se registro el proveedor correctamente'
+                    message: 'Se registro la Factura correctamente'
                 })
                 self.limpiarCampos()
-                this.$router.push('/proveedor/')
+                this.$router.push('/factura/')
             })
             .catch(error => {
                 this.$toast.error({
@@ -332,7 +454,6 @@ import 'vue-simple-suggest/dist/styles.css'
             this.verModal = value
         },
         esActivoModalContacto (value) {
-            console.log('hola' + value)
             this.verModalContacto = value
         },
         agregarCuenta (informacion) {
@@ -347,52 +468,52 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             this.model.contacto.push(contacto)
         },
-        limpiarCampos () {
-            this.model = {
-                nombre: '',
-                descripcion: '',
-                telefono: '',
-                direccion: '',
-                email: '',
-                fechaLimitePago: undefined,
-                id: undefined
-            }
-        },
-        quitarCuenta( item ) {
-            this.model.cuentaBanco = this.model.cuentaBanco.filter( function( e ) {
-                return e !== item
-            } )
-        },
-        quitarContacto( item ) {
-            this.model.contacto = this.model.contacto.filter( function( e ) {
-                return e !== item
-            } )
+        quitarProducto (idQuitar) {
+            const aux = []
+            this.model.productos.forEach(function (producto) {
+                if (producto.id !== idQuitar) {
+                    aux.push(producto)
+                }
+            })
+            this.model.productos = aux
         },
         validacion () {
-            if (this.validarMarca && this.validarStock) {
+            console.log(this.validarProveedor)
+            console.log(this.validarFechaVencimiento)
+            if (this.validarProveedor && this.validarFechaVencimiento) {
                 return true
             }
             return false
         },
-        agregar (item) {
-            this.marcas = item.marcas
-            this.itemSeleccionadoAutocomplete = item
-            if (this.itemSeleccionadoAutocomplete.marcas.length > 1) {
-                this.mostrarSelectorMarca = true
-            } else {
-                this.itemSeleccionadoAutocomplete.idMarca = item.marcas[0]
-                this.agregarProducto ()
+        agregar (suggest) {
+            this.itemSeleccionadoAutocomplete = {
+                nombre: suggest.producto.nombre,
+                id: suggest.id,
+                marcaProductoId: suggest.marca.id,
+                marca: suggest.marca,
+                estadoEntrada: "MAL_ESTADO",
+                unidadMedida: suggest.producto.unidadMedida,
+                cantidad: undefined,
+                porcentajeDescuento: 0,
+                valor: 0,
+                total: 0
             }
+            this.agregarProducto ()
         },
         seleccionar (suggest, e) {
-            this.marcas = suggest.marcas
-            this.itemSeleccionadoAutocomplete = suggest
-            if (this.itemSeleccionadoAutocomplete.marcas.length > 1) {
-                this.mostrarSelectorMarca = true
-            } else {
-                this.itemSeleccionadoAutocomplete.idMarca = suggest.marcas[0]
-                this.agregarProducto ()
+            this.itemSeleccionadoAutocomplete = {
+                nombre: suggest.producto.nombre,
+                id: suggest.id,
+                marcaProductoId: suggest.marca.id,
+                marca: suggest.marca,
+                estadoEntrada: "MAL_ESTADO",
+                unidadMedida: suggest.producto.unidadMedida,
+                cantidad: 0,
+                porcentajeDescuento: 0,
+                valor: 0,
+                total: 0
             }
+            this.agregarProducto ()
         },
         agregarProducto () {
             this.model.productos.push(this.itemSeleccionadoAutocomplete)
@@ -413,31 +534,75 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             return false
         },
-        validarCantidad (valor) {
+        validarDescuento (valor) {
             try {
                 if (valor === '') {
                     return false
                 }
-                if (valor >= 0 && valor <= 10000) {
+                if (valor >= 0 && valor <= 100) {
                     return true
                 }
             } catch (error) {
                 return false
             }
             return false
+        },
+        validarCantidad (valor) {
+            try {
+                if (valor === '' || valor === undefined ) {
+                    return false
+                }
+                if (valor > 0 && valor <= 10000) {
+                    return true
+                }
+            } catch (error) {
+                return false
+            }
+            return false
+        },
+        async apiProductos () {
+            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
+        },
+        async listarProdedores () {
+            this.proveedores = []
+            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores')).data.data
+        },
+        calcularTotalFactura () {
+            if (this.model.productos.length === 0) {
+                this.model.valor = 0
+                this.model.subTotal = 0
+                return
+            }
+            const self = this
+            this.model.valor = 0
+            self.model.valorTotal = 0
+            this.model.productos.forEach(function (producto) {
+                const valor = (producto.valor * producto.cantidad)
+                    - (producto.valor * producto.cantidad) * producto.porcentajeDescuento / 100
+                self.model.valorTotal += valor
+            })
         }
     },
     watch: {
-        'model.idProveedor' () {
+        'model.proveedorId' () {
             const self = this
             const proveedorFiltrado = this.proveedores.find(function (proveedor) {
-                return proveedor.idProveedor === self.model.idProveedor
+                return proveedor.id === self.model.proveedorId
             })
             const hoy = moment().add('days', proveedorFiltrado.fechaLimitePago)
             this.model.fechaVencimiento = hoy.format('YYYY-MM-DD')
+        },
+        'model.productos' () {
+            this.calcularTotalFactura()
+        },
+        'model.valorTotal' () {
+            this.model.subTotal = this.model.valorTotal/1.19
+            this.model.porcentaje = this.model.subTotal*0.19
         }
     },
     created: function() {
+        this.apiProductos()
+        this.listarProdedores()
     }
   }
 </script>

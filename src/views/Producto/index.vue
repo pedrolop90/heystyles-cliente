@@ -100,7 +100,7 @@ import Modificar from './modificar'
             this.formatearItems( productos )
         },
         abrirFormularioRegistro () {
-            this.$router.push('./registro')
+            this.$router.push('/producto/registro')
         },
         gestionarMarca () {
             this.$router.push({
