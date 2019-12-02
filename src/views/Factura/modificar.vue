@@ -38,13 +38,6 @@
                                                 </flat-picker>
                                             </base-input>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                label="Esta Pago?"
-                                                input-classes="form-control-alternative">
-                                                    <b-form-checkbox switch size="lg" class="py-2" v-model="model.fPago"/>
-                                                </base-input>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="pl-lg-4">
@@ -205,7 +198,7 @@
                                             />
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row py-1">
                                         <div class="col-lg-2">
                                             <label for="input-small">Total:</label>
                                         </div>
@@ -224,7 +217,7 @@
                                         </div>
                                     </div>
                                     <div class="row float-right" >
-                                        <base-button outline @click="registrar()" type="success">Registrar</base-button>
+                                        <base-button outline @click="guardarCambios()" type="success">Guardar Cambios</base-button>
                                     </div>
                                 </div>
                             </form>
@@ -236,14 +229,6 @@
     </div>
 </template>
 <script>
-const PROVEEDORES = [
-    { id: '1', nombre: 'NIKE',  text: 'NIKE', value: '1', fechaLimitePago: 10},
-    { id: '2', nombre: 'ADIDAS',  text: 'ADIDAS', value: '2', fechaLimitePago: 45},
-    { id: '3', nombre: 'TREFILADOS',  text: 'TREFILADOS', value: '3', fechaLimitePago: 30},
-    { id: '4', nombre: 'IMPORTADO',  text: 'IMPORTADO', value: '4', fechaLimitePago: 45},
-    { id: '5', nombre: 'COMPAT',  text: 'COMPAT', value: '5', fechaLimitePago: 10},
-    { id: '6', nombre: 'CENTOS',  text: 'CENTOS', value: '6', fechaLimitePago: 0}
-]
 const ESTADOS = [
     { id:'BUEN_ESTADO', text: 'BUENO' },
     { id:'MAL_ESTADO', text: 'MALO' },
@@ -263,6 +248,12 @@ import 'vue-simple-suggest/dist/styles.css'
         VueSuggest
     },
     name: 'RegistrarProducto',
+    props: {
+        facturaOriginal: {
+            required: true,
+            type: Object
+        }
+    },
     data() {
       return {
         autocomplete: '',
@@ -276,7 +267,8 @@ import 'vue-simple-suggest/dist/styles.css'
             valorTotal: 0,
             porcentajeDescuento: 0,
             porcentaje: 0,
-            subTotal: 0
+            subTotal: 0,
+            id: undefined
         },
         iva: 19,
         verModal: false,
@@ -297,7 +289,7 @@ import 'vue-simple-suggest/dist/styles.css'
             "Total",
             {key: 'quitar', label: ''},
         ],
-        proveedores: PROVEEDORES,
+        proveedores: undefined,
         itemsProductos: [],
         marcas: [],
         itemSeleccionadoAutocomplete: {},
@@ -381,7 +373,6 @@ import 'vue-simple-suggest/dist/styles.css'
             const self = this
             let valoresValidos = true
             this.model.productos.forEach(function(producto, index){
-                console.log(index)
                 if (!self.validarPrecios(producto.valor)) {
                     self.$toast.info({
                         title: 'Datos Incompletos',
@@ -418,10 +409,10 @@ import 'vue-simple-suggest/dist/styles.css'
             this.model.idProducto = item[0].idProducto
             this.model.nombre = item[0].nombre
         },
-        async registrar () {
+        async guardarCambios () {
             if (!this.validacion()) {
                 this.$toast.info({
-                    title: 'No se puede registrar la factura',
+                    title: 'No se puede Modificar la factura',
                     message: 'Existen campos vacios o no validos dentro del formulario principal'
                 })
                 return
@@ -431,9 +422,8 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             const self = this
             let fechaPago = this.model.fechaLimitePago
-
             this.model.fechaLimitePago = moment(fechaPago, 'YYYY-MM-DD').format('YYYY-MM-DD HH:mm:ss')
-            axios.post(this.servidorFactura + 'factura/factura', {
+            axios.put(this.servidorFactura + 'factura/factura', {
                 factura: this.model,
                 gestionProductos: this.model.productos
             })
@@ -452,7 +442,6 @@ import 'vue-simple-suggest/dist/styles.css'
             })
         },
         registrarAux() {
-            console.log(this.model)
             const proveedor = {
                 ...this.model
             }
@@ -483,10 +472,7 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         quitarProducto (codQuitar) {
             const aux = []
-            console.log('quitar')
-            console.log(codQuitar)
             this.model.productos.forEach(function (producto) {
-                console.log(producto)
                 if (producto.cod !== codQuitar) {
                     aux.push(producto)
                 }
@@ -494,23 +480,19 @@ import 'vue-simple-suggest/dist/styles.css'
             this.model.productos = aux
         },
         validacion () {
-            console.log(this.validarProveedor)
-            console.log(this.validarfechaLimitePago)
             if (this.validarProveedor && this.validarfechaLimitePago) {
                 return true
             }
             return false
         },
         agregar (suggest) {
-            console.log('agregar')
-            console.log(suggest)
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
                 nombre: suggest.producto.nombre,
                 marcaProductoId: suggest.marca.id,
                 marca: suggest.marca,
-                estadoEntrada: 'BUEN_ESTADO',
+                estadoEntrada: suggest.producto.estadoEntrada,
                 unidadMedida: suggest.producto.unidadMedida,
                 cantidad: undefined,
                 porcentajeDescuento: 0,
@@ -520,15 +502,13 @@ import 'vue-simple-suggest/dist/styles.css'
             this.agregarProducto ()
         },
         seleccionar (suggest, e) {
-            console.log('agregar')
-            console.log(suggest)
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
                 nombre: suggest.producto.nombre,
                 marcaProductoId: suggest.marca.id,
                 marca: suggest.marca,
-                estadoEntrada: 'BUEN_ESTADO',
+                estadoEntrada: suggest.producto.estadoEntrada,
                 unidadMedida: suggest.producto.unidadMedida,
                 cantidad: 0,
                 porcentajeDescuento: 0,
@@ -605,10 +585,36 @@ import 'vue-simple-suggest/dist/styles.css'
             })
         },
         limpiar () {
-            console.log(this.limpiarAutocomplete)
             if (this.limpiarAutocomplete) {
                 this.autocomplete =''
             }
+        },
+        prepararFactura: async function () {
+            this.model.proveedorId = this.facturaOriginal.proveedorId
+            this.model.id = this.facturaOriginal.id
+            this.model.fechaLimitePago =  moment(this.facturaOriginal.fechaLimitePago,'YYYY-MM-DD').format('YYYY-MM-DD')
+            // /gestion-producto/{facturaId}/extended
+            const lista = (await axios.get(this.servidorFactura + 'factura/gestion-producto/' + this.facturaOriginal.id + '/extended')).data.data
+            const self = this
+            lista.forEach(function (item) {
+                const productoFiltrado = self.itemsProductos.find(function (producto) {
+                    return producto.producto.id === item.gestionProducto.marcaProductoId
+                })
+                self.itemSeleccionadoAutocomplete = {
+                    cod: item.gestionProducto.marcaProductoId,
+                    nombre: productoFiltrado.producto.nombre,
+                    marcaProductoId: productoFiltrado.id,
+                    marca: productoFiltrado.marca.id,
+                    estadoEntrada: item.gestionProducto.estadoEntrada,
+                    unidadMedida: productoFiltrado.producto.unidadMedida,
+                    cantidad: item.gestionProducto.cantidad,
+                    porcentajeDescuento: item.gestionProducto.porcentajeDescuento,
+                    valor: item.gestionProducto.valor,
+                    total: 0
+                }
+                console.log(productoFiltrado)
+                self.agregarProducto ()
+            })
         }
     },
     watch: {
@@ -628,15 +634,12 @@ import 'vue-simple-suggest/dist/styles.css'
         'model.valorTotal' () {
             this.model.subTotal = this.model.valorTotal/1.19
             this.model.porcentaje = this.model.subTotal*0.19
-        },
-        'autocomplete' () {
-            console.log(this.autocomplete)
-        },
-        
+        }
     },
-    created: function() {
-        this.apiProductos()
-        this.listarProdedores()
+    created: async function() {
+        await this.apiProductos()
+        await this.listarProdedores()
+        await this.prepararFactura()
     }
   }
 </script>

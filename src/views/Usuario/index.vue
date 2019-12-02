@@ -73,7 +73,7 @@ import Modificar from './modificar'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'usuarios'])
+        ...mapState(['servidorAcceso', 'usuarios', 'sesionActiva'])
     },
     methods: {
         async listarAux () {
@@ -81,10 +81,8 @@ import Modificar from './modificar'
             this.formatearItemsAux( usuarios )
         },
         async listar () {
-            if (this.cargos === undefined) {
-                this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
-            }
-            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios')).data.data
+            const headers = { usuario: this.sesionActiva.numeroDocumento}
+            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios', headers)).data.data
             console.log('<<<<<' + usuarios)
             this.formatearItems( usuarios )
         },
@@ -99,12 +97,9 @@ import Modificar from './modificar'
         formatearItems (usuarios) {
             const self = this
             usuarios.forEach( function(usuario) {
-                const cargoItem = self.cargos.find(function (cargo){
-                    return cargo.id === usuario.cargoId 
-                })
                 const item = {
-                    ...usuario,
-                    cargo: cargoItem.nombre
+                    ...usuario.usuario,
+                    cargo: usuario.cargo.nombre
                 }
                 self.itemsUsuarios.push(item)
             })

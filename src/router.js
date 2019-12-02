@@ -127,6 +127,12 @@ export default new Router({
           path: 'factura/registrar',
           name: 'registrarFactura',
           component: () => import('./views/Factura/registrar.vue')
+        },
+        {
+          path: 'factura/modificar',
+          name: 'modificarFactura',
+          component: () => import('./views/Factura/modificar.vue'),
+          props: (route) => ({ facturaOriginal: route.params.facturaOriginal })
         }
       ]
     },

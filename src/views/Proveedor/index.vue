@@ -72,7 +72,6 @@ import axios from 'axios'
                     proveedorOriginal: item[0]
                 }
             })
-            console.log('me clickeaste ' + item[0])
         }
     },
     watch: {
