@@ -14,6 +14,13 @@
                         <template>
                             <div>
                                 <h6 class="heading-small text-muted mb-4">Lista de Marcas</h6>
+                                <div class="text-right" >
+                                    <registrar-marca :verModal="verModal" @esActivo="esActivo" @agregarMarca="agregarMarca"/>
+                                        <base-button outline type="secondary" @click="verModal = true" >
+                                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                        Crear Marca
+                                    </base-button>
+                                </div>
                                 <b-table hover small striped :fields="columnasMarcas" :items="marcas">
                                         <template slot="Eliminar" slot-scope="data">
                                             <base-button
@@ -25,13 +32,6 @@
                                             </base-button>
                                         </template>
                                 </b-table>
-                            </div>
-                            <div class="text-right" >
-                                <registrar-marca :verModal="verModal" @esActivo="esActivo" @agregarMarca="agregarMarca"/>
-                                    <base-button outline type="secondary" @click="verModal = true" >
-                                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                                    Crear Marca
-                                </base-button>
                             </div>
                         </template>
                     </card>

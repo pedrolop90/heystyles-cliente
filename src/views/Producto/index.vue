@@ -13,17 +13,6 @@
                         </div>
                         <template>
                             <h6 class="heading-small text-muted mb-4">Lista de Productos</h6>
-                            <b-table striped hover :fields="camposTablaProducto" :items="itemsProductos" responsive="sm" selected-variant="active">
-                                <template slot="Eliminar" slot-scope="data">
-                                    <base-button
-                                        outline
-                                        type="warning"
-                                        @click="eliminarProducto(data.item)"
-                                        v-b-popover.hover.top="'Eliminar Producto'">
-                                         <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
-                                    </base-button>
-                                </template>
-                            </b-table>
                             <div class="text-right" >
                                 <base-button outline type="secondary" @click="gestionarItems()" >
                                     <i class="fa fa-users" aria-hidden="true"></i>
@@ -38,6 +27,23 @@
                                     Registrar Producto
                                 </base-button>
                             </div>
+                            <b-table :fields="camposTablaProducto" :busy="true" :items="itemsProductos" outlined>
+                                <template slot="Eliminar" slot-scope="data">
+                                    <base-button
+                                        outline
+                                        type="warning"
+                                        @click="eliminarProducto(data.item)"
+                                        v-b-popover.hover.top="'Eliminar Producto'">
+                                         <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
+                                    </base-button>
+                                </template>
+                                <template slot:table-busy>
+                                    <div class="text-center text-danger my-2">
+                                    <b-spinner class="align-middle"></b-spinner>
+                                        <strong>Cargando...</strong>
+                                    </div>
+                                </template>
+                            </b-table>
                         </template>
                     </card>
                 </div>
@@ -65,7 +71,8 @@ import Modificar from './modificar'
             direccion: '',
             email: '',
             fechaLimitePago: 0,
-            id: undefined
+            id: undefined,
+            cargando: false
         },
         itemsProductos: [
             { nombre: 'Pegante Super 200 ml amarillo', marca: 'CABALLO', unidadMedida: 'ML', stockMinimo: '50' },
@@ -95,9 +102,17 @@ import Modificar from './modificar'
             this.formatearItemsAux( usuarios )
         },
         async apiProductos () {
-            const productos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
-            this.itemsProductos = []
-            this.formatearItems( productos )
+            this.cargando = false
+            try {
+                const productos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
+                this.itemsProductos = []
+                this.formatearItems( productos )
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.cargando = true
+            }
+            
         },
         abrirFormularioRegistro () {
             this.$router.push('/producto/registro')

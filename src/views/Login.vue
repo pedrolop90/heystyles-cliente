@@ -98,6 +98,7 @@ import axios from 'axios'
                 // console.log(response.data.data.menuExtended.hijos)
                 self.$store.commit('iniciarSesion', response.data.data.menuExtended.hijos)
                 self.$store.commit('consultarSesion', response.data.data.usuario)
+                axios.defaults.headers.common['usuario'] = this.sesionActiva.numeroDocumento // for all requests
                 this.$router.push('/perfil/')
             })
             .catch(error => {

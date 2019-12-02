@@ -58,7 +58,7 @@
                                                     :list="itemsProductos"
                                                     :filter-by-query="true"
                                                     :max-suggestions="10"
-                                                    :min-length="3"
+                                                    :min-length="1"
                                                     value-attribute="id"
                                                     display-attribute="producto.nombre"
                                                     @select="seleccionar"
@@ -91,13 +91,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <b-table striped hover selectable :fields="camposTablaItemsProducto" :items="model.productos" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single">
+                                    <b-table striped hover :fields="camposTablaItemsProducto" :items="model.productos" responsive="sm" selected-variant="active">
                                         <template slot="quitar" slot-scope="data">
                                             <b-button
                                                 variant="outline-warning"
                                                 size="sm"
                                                 v-b-popover.hover.top="'Quitar el Producto'"
-                                                @click="quitarProducto(data.item.cod)"
+                                                @click="quitarProducto(data.index)"
                                             >
                                                 X
                                             </b-button>
@@ -180,7 +180,7 @@
                                                 type="number"
                                                 label="Valor Total"
                                                 input-classes="form-control-alternative"
-                                                v-model="model.porcentaje"
+                                                v-model="model.porcentajeIva"
                                                 min= 0
                                                 max= 1000
                                                 size="sm"
@@ -275,7 +275,7 @@ import 'vue-simple-suggest/dist/styles.css'
             productos: [],
             valorTotal: 0,
             porcentajeDescuento: 0,
-            porcentaje: 0,
+            porcentajeIva: 0,
             subTotal: 0
         },
         iva: 19,
@@ -432,7 +432,8 @@ import 'vue-simple-suggest/dist/styles.css'
             const self = this
             let fechaPago = this.model.fechaLimitePago
 
-            this.model.fechaLimitePago = moment(fechaPago, 'YYYY-MM-DD').format('YYYY-MM-DD HH:mm:ss')
+            this.model.fechaLimitePago = moment(fechaPago, 'YYYY-MM-DD').format('YYYY-MM-DD')
+            this.model.porcentajeIva = 19
             axios.post(this.servidorFactura + 'factura/factura', {
                 factura: this.model,
                 gestionProductos: this.model.productos
@@ -483,13 +484,12 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         quitarProducto (codQuitar) {
             const aux = []
-            console.log('quitar')
-            console.log(codQuitar)
+            let index = 0
             this.model.productos.forEach(function (producto) {
-                console.log(producto)
-                if (producto.cod !== codQuitar) {
+                if (index !== codQuitar) {
                     aux.push(producto)
                 }
+                index++
             })
             this.model.productos = aux
         },
@@ -508,7 +508,7 @@ import 'vue-simple-suggest/dist/styles.css'
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
                 nombre: suggest.producto.nombre,
-                marcaProductoId: suggest.marca.id,
+                marcaProductoId: suggest.id,
                 marca: suggest.marca,
                 estadoEntrada: 'BUEN_ESTADO',
                 unidadMedida: suggest.producto.unidadMedida,
@@ -526,7 +526,7 @@ import 'vue-simple-suggest/dist/styles.css'
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
                 nombre: suggest.producto.nombre,
-                marcaProductoId: suggest.marca.id,
+                marcaProductoId: suggest.id,
                 marca: suggest.marca,
                 estadoEntrada: 'BUEN_ESTADO',
                 unidadMedida: suggest.producto.unidadMedida,
@@ -627,7 +627,7 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         'model.valorTotal' () {
             this.model.subTotal = this.model.valorTotal/1.19
-            this.model.porcentaje = this.model.subTotal*0.19
+            this.model.porcentajeIva = this.model.subTotal*0.19
         },
         'autocomplete' () {
             console.log(this.autocomplete)

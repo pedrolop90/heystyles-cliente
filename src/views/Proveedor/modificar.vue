@@ -163,6 +163,7 @@ import axios from 'axios'
             email: '',
             fechaLimitePago: 0,
             id: null,
+            estado: 'ACTIVO',
             cuentasBanco: [],
             contactos: []
         },

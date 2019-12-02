@@ -10,7 +10,7 @@
                   class="border-0">
                 <template>
                     <div class="text-center text-muted mb-10">
-                        <h2>Crear Item Producto</h2>
+                        <h2>Crear Item</h2>
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </div>
                     <form role="form">
@@ -19,7 +19,7 @@
                         </div>
                         <base-input alternative
                                     class="mb-3"
-                                    placeholder="Nombre de la Marca"
+                                    placeholder="Nombre del Item"
                                     addon-left-icon="fa fa-university"
                                     v-model="model.nombre"
                                     :valid="validarNombre">
@@ -88,7 +88,8 @@ export default {
                 nombre: undefined,
                 id: null,
                 unidadMedidaId: undefined,
-                stockMinimo: undefined
+                stockMinimo: undefined,
+                estado: 'ACTIVO'
             },
             unidadesMedida: UNIDAD_MEDIDA
         }

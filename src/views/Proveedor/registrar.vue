@@ -155,6 +155,7 @@ import axios from 'axios'
             direccion: undefined,
             email: undefined,
             fechaLimitePago: 0,
+            estado: 'ACTIVO',
             id: null,
             cuentaBanco: [],
             contacto: []

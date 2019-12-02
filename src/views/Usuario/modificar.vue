@@ -149,7 +149,7 @@ import axios from 'axios'
       }
     },
     computed: {
-        ...mapState(['servidorAcceso', 'usuarios']),
+        ...mapState(['servidorAcceso', 'usuarios', 'sesionActiva']),
         validarNombres () {
             if (this.model.nombres === '') {
                 return false
@@ -234,9 +234,12 @@ import axios from 'axios'
                 })
                 return
             }
-            axios.put(this.servidorAcceso + 'usuarios/usuarios', {
-                ...this.model
-            })
+            const params = {
+                usuario: {
+                    ...this.model
+                }
+            }
+            axios.put(this.servidorAcceso + 'usuarios/usuarios', params)
             .then(response => {
                 this.$toast.success({
                     title: 'Registro Exitoso',
@@ -313,6 +316,8 @@ import axios from 'axios'
         this.model = {
             ...this.usuario
         }
+        console.log(this.model)
+        console.log(this.sesionActiva)
     }
   }
 </script>

@@ -10,7 +10,7 @@
                   class="border-0">
                 <template>
                     <div class="text-center text-muted mb-4">
-                        <h2>Crear Item de Producto</h2>
+                        <h2>Crear Nueva Marca</h2>
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </div>
                     <form role="form">
@@ -108,10 +108,6 @@ export default {
             this.$emit('agregarMarca', this.model)
             this.limpiar()
             this.activo = false
-            this.$toast.info({
-                title: 'Exito',
-                message: 'Se agrego una nueva marca'
-            })
         },
         limpiar () {
             this.model = {

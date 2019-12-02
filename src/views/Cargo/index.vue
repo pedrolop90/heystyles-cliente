@@ -80,13 +80,10 @@ export default {
         cargoSeleccionado : async function () {
             const self = this
                 this.model.id = this.cargoSeleccionado
-                console.log('id ' + this.model.id)
                 const datos = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+self.model.id)).data.data
                 this.model = {
                     ...datos
                 }
-                console.log('>-------------<')
-                console.log(datos)
                 this.model.id = datos.cargo.id
                 this.model.nombre = datos.cargo.nombre
                 /*

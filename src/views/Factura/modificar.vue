@@ -143,7 +143,7 @@
                                             />
                                         </template>
                                         <template slot="nombre" slot-scope="data">
-                                            {{data.item.nombre}} (<em>{{ data.item.marca.nombre }}</em>)
+                                            {{data.item.nombre}} (<em>{{ data.item.marca }}</em>)
                                         </template>
                                         <template slot="unidadMedida" slot-scope="data">
                                             {{ data.item.unidadMedida.nombre }}
@@ -173,7 +173,7 @@
                                                 type="number"
                                                 label="Valor Total"
                                                 input-classes="form-control-alternative"
-                                                v-model="model.porcentaje"
+                                                v-model="model.porcentajeIva"
                                                 min= 0
                                                 max= 1000
                                                 size="sm"
@@ -266,7 +266,7 @@ import 'vue-simple-suggest/dist/styles.css'
             productos: [],
             valorTotal: 0,
             porcentajeDescuento: 0,
-            porcentaje: 0,
+            porcentajeIva: 0,
             subTotal: 0,
             id: undefined
         },
@@ -422,7 +422,8 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             const self = this
             let fechaPago = this.model.fechaLimitePago
-            this.model.fechaLimitePago = moment(fechaPago, 'YYYY-MM-DD').format('YYYY-MM-DD HH:mm:ss')
+            this.model.fechaLimitePago = moment(fechaPago, 'YYYY-MM-DD').format('YYYY-MM-DD')
+            this.model.porcentajeIva = 19
             axios.put(this.servidorFactura + 'factura/factura', {
                 factura: this.model,
                 gestionProductos: this.model.productos
@@ -489,12 +490,13 @@ import 'vue-simple-suggest/dist/styles.css'
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
+                id: suggest.id,
                 nombre: suggest.producto.nombre,
-                marcaProductoId: suggest.marca.id,
+                marcaProductoId: suggest.marcaProductoId,
                 marca: suggest.marca,
                 estadoEntrada: suggest.producto.estadoEntrada,
                 unidadMedida: suggest.producto.unidadMedida,
-                cantidad: undefined,
+                cantidad: 0,
                 porcentajeDescuento: 0,
                 valor: 0,
                 total: 0
@@ -505,8 +507,9 @@ import 'vue-simple-suggest/dist/styles.css'
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
+                id: suggest.id,
                 nombre: suggest.producto.nombre,
-                marcaProductoId: suggest.marca.id,
+                marcaProductoId: suggest.marcaProductoId,
                 marca: suggest.marca,
                 estadoEntrada: suggest.producto.estadoEntrada,
                 unidadMedida: suggest.producto.unidadMedida,
@@ -597,14 +600,15 @@ import 'vue-simple-suggest/dist/styles.css'
             const lista = (await axios.get(this.servidorFactura + 'factura/gestion-producto/' + this.facturaOriginal.id + '/extended')).data.data
             const self = this
             lista.forEach(function (item) {
-                const productoFiltrado = self.itemsProductos.find(function (producto) {
-                    return producto.producto.id === item.gestionProducto.marcaProductoId
+                const productoFiltrado = self.itemsProductos.find(function (producto, index) {
+                    return producto.id === item.gestionProducto.marcaProductoId
                 })
                 self.itemSeleccionadoAutocomplete = {
                     cod: item.gestionProducto.marcaProductoId,
+                    id: item.gestionProducto.id,
                     nombre: productoFiltrado.producto.nombre,
                     marcaProductoId: productoFiltrado.id,
-                    marca: productoFiltrado.marca.id,
+                    marca: productoFiltrado.marca.nombre,
                     estadoEntrada: item.gestionProducto.estadoEntrada,
                     unidadMedida: productoFiltrado.producto.unidadMedida,
                     cantidad: item.gestionProducto.cantidad,
@@ -612,7 +616,6 @@ import 'vue-simple-suggest/dist/styles.css'
                     valor: item.gestionProducto.valor,
                     total: 0
                 }
-                console.log(productoFiltrado)
                 self.agregarProducto ()
             })
         }
@@ -633,7 +636,7 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         'model.valorTotal' () {
             this.model.subTotal = this.model.valorTotal/1.19
-            this.model.porcentaje = this.model.subTotal*0.19
+            this.model.porcentajeIva = this.model.subTotal*0.19
         }
     },
     created: async function() {

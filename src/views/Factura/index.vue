@@ -14,7 +14,13 @@
                         <template>
                             <div>
                                 <h6 class="heading-small text-muted mb-4">Lista de Facturas</h6>
-                                <b-table striped hover small selectable :fields="columnasItem" :items="productos" v-if="verTabla" @row-selected="seleccionado">
+                                <div class="text-right" >
+                                    <base-button outline type="secondary" @click="crearFactura()" >
+                                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                        Crear Factura
+                                    </base-button>
+                                </div>
+                                <b-table striped hover small selectable :busy="cargando" :fields="columnasItem" :items="productos" v-if="verTabla" @row-selected="seleccionado">
                                         <template slot="Editar" slot-scope="data">
                                             <modificar-item :verModal="data.item.editar" :unidadesMedidaProp="unidadesMedida" :producto="data.item" @esActivo="data.item.editar = true" @esInactivo="data.item.editar = false" @modificarItem="modificarItem"/>
                                             <base-button outline type="secondary" @click="data.item.editar = true" >
@@ -31,13 +37,13 @@
                                                 <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
                                             </base-button>
                                         </template>
+                                        <template v-slot:table-busy>
+                                            <div class="text-center text-danger my-2">
+                                                <b-spinner class="align-middle"></b-spinner>
+                                            <strong>Cargando...</strong>
+                                            </div>
+                                        </template>
                                 </b-table>
-                            </div>
-                            <div class="text-right" >
-                                <base-button outline type="secondary" @click="crearFactura()" >
-                                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                                    Crear Factura
-                                </base-button>
                             </div>
                         </template>
                     </card>
@@ -74,7 +80,8 @@ export default {
         marcaSeleccionado: '',
         unidadesMedida: [],
         verTabla: false,
-        valor: false
+        valor: false,
+        cargando: false
       }
     },
     computed: {
@@ -154,19 +161,26 @@ export default {
             })
         },
         async apiFacturas () {
+            this.cargando = true
             this.verTabla = false
             this.productos = []
             this.verModalEditar = []
             const self = this
             const arrayProducto = []
-            this.facturas = (await axios.get(this.servidorFactura + '/factura/factura')).data.data
-            this.facturas.forEach(function (item) {
-                const p = {
-                    ...item.factura,
-                    nombreProveedor: item.proveedor.proveedor.nombre
-                }
-                arrayProducto.push(p)
-            }) 
+            try {
+                this.facturas = (await axios.get(this.servidorFactura + '/factura/factura')).data.data
+                this.facturas.forEach(function (item) {
+                    const p = {
+                        ...item.factura,
+                        nombreProveedor: item.proveedor.proveedor.nombre
+                    }
+                    arrayProducto.push(p)
+                }) 
+            } catch (error) {
+                console.log(error)
+            } finally {
+                this.cargando = false
+            }
             this.productos = arrayProducto
             this.verTabla = true
         },

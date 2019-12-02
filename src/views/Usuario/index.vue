@@ -13,9 +13,7 @@
                         </div>
                         <template>
                             <h6 class="heading-small text-muted mb-4">Seleccione para modificar</h6>
-                            <b-table striped hover selectable :fields="camposTablaUsuario" :items="itemsUsuarios" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single" >
-                                
-                            </b-table>
+                            
                             <div class="text-right" >
                                 <base-button outline type="secondary" @click="gestionarCargos()" >
                                     <i class="fa fa-users" aria-hidden="true"></i>
@@ -26,6 +24,9 @@
                                     Registrar
                                 </base-button>
                             </div>
+                            <b-table striped hover selectable :fields="camposTablaUsuario" :items="itemsUsuarios" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single" >
+                                
+                            </b-table>
                         </template>
                     </card>
                 </div>
@@ -82,8 +83,7 @@ import Modificar from './modificar'
         },
         async listar () {
             const headers = { usuario: this.sesionActiva.numeroDocumento}
-            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios', headers)).data.data
-            console.log('<<<<<' + usuarios)
+            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios')).data.data
             this.formatearItems( usuarios )
         },
         abrirFormularioRegistro () {
@@ -125,14 +125,12 @@ import Modificar from './modificar'
                     usuario: item[0]
                 }
             })
-            console.log('me clickeaste ' + item[0])
         }
     },
     watch: {
     },
     created: function() {
         this.listar()
-        // this.listarAux()
     }
   }
 </script>

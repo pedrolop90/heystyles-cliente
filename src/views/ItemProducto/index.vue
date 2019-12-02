@@ -14,8 +14,13 @@
                         <template>
                             <div>
                                 <h6 class="heading-small text-muted mb-4">Lista de Items</h6>
-
-                                
+                                <div class="text-right" >
+                                    <registrar-item :verModal="verModal" @esActivo="esActivo" @agregarItem="agregarItem"/>
+                                    <base-button outline type="secondary" @click="verModal = true" >
+                                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                                        Crear Item
+                                    </base-button>
+                                </div>
                                 <b-table striped hover small :fields="columnasItem" :items="productos" v-if="verTabla">
                                         <template slot="Editar" slot-scope="data">
                                             <modificar-item :verModal="data.item.editar" :unidadesMedidaProp="unidadesMedida" :producto="data.item" @esActivo="data.item.editar = true" @esInactivo="data.item.editar = false" @modificarItem="modificarItem"/>
@@ -37,13 +42,6 @@
                                             {{ data.item.unidadMedida.abreviatura }}
                                         </template>
                                 </b-table>
-                            </div>
-                            <div class="text-right" >
-                                <registrar-item :verModal="verModal" @esActivo="esActivo" @agregarItem="agregarItem"/>
-                                <base-button outline type="secondary" @click="verModal = true" >
-                                    <i class="fa fa-plus-circle" aria-hidden="true"></i>
-                                    Crear Item de Producto
-                                </base-button>
                             </div>
                         </template>
                     </card>

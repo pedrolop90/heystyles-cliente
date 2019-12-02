@@ -13,13 +13,14 @@
                         </div>
                         <template>
                             <h6 class="heading-small text-muted mb-4">Seleccione para modificar</h6>
-                            <b-table striped hover selectable :fields="camposTablaProveedor" :items="itemsProveedores" @row-selected="seleccionado"/>
                             <div class="text-right" >
                                 <base-button outline type="secondary" @click="abrirFormularioRegistro()" >
                                     <i class="fa fa-plus-circle" aria-hidden="true"></i>
                                     Registrar
                                 </base-button>
                             </div>
+                            <b-table striped hover selectable :fields="camposTablaProveedor" :items="itemsProveedores" @row-selected="seleccionado"/>
+                            
                         </template>
                     </card>
                 </div>
@@ -60,7 +61,11 @@ import axios from 'axios'
     },
     methods: {
         async consultar () {
-            this.itemsProveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores')).data.data
+            this.itemsProveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores',{   
+                params: {
+                    estado: 'ACTIVO', 
+                }
+            })).data.data
         },
         abrirFormularioRegistro () {
             this.$router.push('/proveedor/registro')

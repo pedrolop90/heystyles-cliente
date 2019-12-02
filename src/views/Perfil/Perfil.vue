@@ -34,12 +34,13 @@
                                                         :valid="validarApellidos"
                                             />
                                         </div>
-                                        <div class="col-lg-4">
-                                            <base-input label="Cargo" :valid="validarCargo">
-                                                <select class="form-control" v-model="model.cargoId">
-                                                    <option v-for="cargo in cargos" :key="cargo.id" :value="cargo.id" >{{ cargo.nombre }}</option>
-                                                </select>
-                                            </base-input>
+                                       <div class="col-lg-4">
+                                            <base-input alternative=""
+                                                label="Cargo"
+                                                input-classes="form-control-alternative"
+                                                v-model="cargo"
+                                                disabled
+                                            />
                                         </div>
                                         <div class="col-lg-4">
                                             <base-input label="Tipo Documento" :valid="validarTipoDocumento">
@@ -139,7 +140,8 @@ import axios from 'axios'
             {id: '1', nombre: 'Gerente'},
             {id: '2', nombre: 'Secretaria'},
             {id: '3', nombre: 'Bodeguero'}
-        ]
+        ],
+        cargo: ''
       }
     },
     computed: {
@@ -227,8 +229,8 @@ import axios from 'axios'
                 }
             }
         },
-        'model.cargoId' () {
-            console.log('cambie')
+        'model.cargo' () {
+            console.log(this.model.cargo)
         }
     },
     methods: {
@@ -276,13 +278,16 @@ import axios from 'axios'
             return false
         }
     },
-    created: function() {
+    created: async function() {
+        console.log('cargo es ' + this.model.cargo)
         this.apiCargos()
         if (this.sesionActiva) {
             this.model = {
                 ...this.sesionActiva
             }
         }
+        const infoCargo = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+this.model.cargoId)).data.data
+        this.cargo = infoCargo.cargo.nombre
     }
   }
 </script>

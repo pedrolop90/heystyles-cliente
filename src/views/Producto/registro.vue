@@ -25,7 +25,7 @@
                                                     :list="itemsProductos"
                                                     :filter-by-query="true"
                                                     :max-suggestions="10"
-                                                    :min-length="3"
+                                                    :min-length="1"
                                                     value-attribute="id"
                                                     display-attribute="nombre"
                                                     @suggestion-click="seleccionar"
@@ -59,7 +59,7 @@
                                                 label="Stock Minimo"
                                                 placeholder="Stock Minimo Permitido del Producto"
                                                 input-classes="form-control-alternative"
-                                                v-model="stockMinimo"
+                                                v-model="model.producto.stockMinimo"
                                                 min= 0
                                                 max= 1000
                                                 :valid="validarStock"
@@ -148,9 +148,9 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         validarStock () {
             try {
-                if (this.stockMinimo >= 0 && this.stockMinimo <= 1000) {
+                if (this.model.producto.stockMinimo >= 0 && this.model.producto.stockMinimo <= 1000) {
                     return true
-                } else if (this.stockMinimo === undefined) {
+                } else if (this.model.producto.stockMinimo === undefined) {
                     return undefined
                 }
             } catch (error) {
@@ -205,6 +205,8 @@ import 'vue-simple-suggest/dist/styles.css'
                 return 
             }
             listaIdMarcas.push(self.marcaSeleccionada)
+            console.log('this.model')
+            console.log(this.model)
             axios.put(this.servidorProducto + 'producto/producto', {
                 ...this.model,
                 marcas: listaIdMarcas
