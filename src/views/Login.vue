@@ -80,15 +80,19 @@ import axios from 'axios'
     methods: {
         async ingresar () {
             const self = this
+            let usuario = undefined
             axios.post(this.servidorSeguridad + 'auth/login', {
                 ...this.model
             })
-            .then(response => {
+            .then(async function (response) {
+                
+                console.log('response')
+                console.log(response)
                 const datos = response.data.data
                 if (!self.validarUsuarioActivo (datos)) {
                     return false
                 }
-                this.$toast.success({
+                self.$toast.success({
                     title: 'Bienvenido',
                     message: 'Login exitoso'
                 })
@@ -97,16 +101,19 @@ import axios from 'axios'
                 // console.log(response.data.data)
                 // console.log(response.data.data.menuExtended.hijos)
                 self.$store.commit('iniciarSesion', response.data.data.menuExtended.hijos)
-                self.$store.commit('consultarSesion', response.data.data.usuario)
-                // axios.defaults.headers.common['usuario'] = this.sesionActiva.numeroDocumento // for all requests
-                this.$router.push('/perfil/')
+                usuario = response.data.data.usuario
+                const sesion = (await axios.get(self.servidorAcceso + 'usuarios/usuarios/numeroDocumento/' + usuario)).data.data
+                self.$store.commit('consultarSesion', sesion)
+                self.$router.push('/perfil/')
             })
             .catch(error => {
                 this.$toast.error({
                     title: error.response.data.message,
                     message: 'La contraseña o correo es incorrecto'
                 })
+                return
             })
+                
         },
         ingresarAux () {
             const self = this

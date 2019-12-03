@@ -114,7 +114,7 @@ export default new Vuex.Store({
             console.log(hijos)
         },
         async consultarSesion (state, usuario) {
-            state.sesionActiva = (await axios.get(state.servidorAcceso + 'usuarios/usuarios/numeroDocumento/' + usuario)).data.data
+            state.sesionActiva = usuario
         }
     },
     actions: {

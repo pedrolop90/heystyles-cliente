@@ -44,6 +44,9 @@
                                     </div>
                                 </template>
                             </b-table>
+                            <div class="text-center" v-if="loader">
+                                <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                            </div>
                         </template>
                     </card>
                 </div>
@@ -74,10 +77,7 @@ import Modificar from './modificar'
             id: undefined,
             cargando: false
         },
-        itemsProductos: [
-            { nombre: 'Pegante Super 200 ml amarillo', marca: 'CABALLO', unidadMedida: 'ML', stockMinimo: '50' },
-            { nombre: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', marca: 'TOCAN', unidadMedida: 'MTR', stockMinimo: '100' }
-        ],
+        itemsProductos: [],
         camposTablaProducto: [
             { key: 'nombre', label: 'Producto' },
             { key: 'marca', label: 'Marca' },
@@ -90,7 +90,8 @@ import Modificar from './modificar'
             {id: '1', nombre: 'Gerente'},
             {id: '2', nombre: 'Secretaria'},
             {id: '3', nombre: 'Bodeguero'}
-        ]
+        ],
+        loader: false
       }
     },
     computed: {
@@ -104,7 +105,11 @@ import Modificar from './modificar'
         async apiProductos () {
             this.cargando = false
             try {
-                const productos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
+                const productos = (await axios.get(this.servidorProducto + 'producto/marca-producto', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
                 this.itemsProductos = []
                 this.formatearItems( productos )
             } catch (error) {
@@ -189,9 +194,11 @@ import Modificar from './modificar'
     },
     watch: {
     },
-    created: function() {
-        this.apiProductos()
+    created: async function() {
+        this.loader = true
+        await this.apiProductos()
         // this.listarAux()
+        this.loader = false
     }
   }
 </script>

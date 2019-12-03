@@ -11,7 +11,10 @@
                                 </div>
                             </div>
                         </div>
-                        <template v-if="sesionActiva !== undefined && sesionActiva !== null">
+                        <div class="text-center" v-if="loader">
+                            <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                        </div>
+                        <template v-if="sesionActiva !== undefined && sesionActiva !== null && !loader">
                             <form @submit.prevent>
                                 <div class="pl-lg-4">
                                     <div class="row">
@@ -141,7 +144,8 @@ import axios from 'axios'
             {id: '2', nombre: 'Secretaria'},
             {id: '3', nombre: 'Bodeguero'}
         ],
-        cargo: ''
+        cargo: '',
+        loader: false
       }
     },
     computed: {
@@ -279,8 +283,8 @@ import axios from 'axios'
         }
     },
     created: async function() {
-        console.log('cargo es ' + this.model.cargo)
-        this.apiCargos()
+        this.loader = true
+        await this.apiCargos()
         if (this.sesionActiva) {
             this.model = {
                 ...this.sesionActiva
@@ -288,6 +292,7 @@ import axios from 'axios'
         }
         const infoCargo = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+this.model.cargoId)).data.data
         this.cargo = infoCargo.cargo.nombre
+        this.loader = false
     }
   }
 </script>

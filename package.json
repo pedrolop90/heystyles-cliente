@@ -21,6 +21,7 @@
     "vue-chartjs": "3.4.2",
     "vue-clipboard2": "0.3.0",
     "vue-flatpickr-component": "8.1.2",
+    "vue-loaders": "^3.0.2",
     "vue-moment": "^4.0.0",
     "vue-router": "3.0.1",
     "vue-simple-suggest": "^1.10.1",

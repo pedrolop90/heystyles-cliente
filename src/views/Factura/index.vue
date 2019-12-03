@@ -20,7 +20,7 @@
                                         Crear Factura
                                     </base-button>
                                 </div>
-                                <b-table striped hover small selectable :busy="cargando" :fields="columnasItem" :items="productos" v-if="verTabla" @row-selected="seleccionado">
+                                <b-table striped hover small selectable :fields="columnasItem" :items="productos" v-if="verTabla" @row-selected="seleccionado">
                                         <template slot="Editar" slot-scope="data">
                                             <modificar-item :verModal="data.item.editar" :unidadesMedidaProp="unidadesMedida" :producto="data.item" @esActivo="data.item.editar = true" @esInactivo="data.item.editar = false" @modificarItem="modificarItem"/>
                                             <base-button outline type="secondary" @click="data.item.editar = true" >
@@ -37,14 +37,11 @@
                                                 <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
                                             </base-button>
                                         </template>
-                                        <template v-slot:table-busy>
-                                            <div class="text-center text-danger my-2">
-                                                <b-spinner class="align-middle"></b-spinner>
-                                            <strong>Cargando...</strong>
-                                            </div>
-                                        </template>
                                 </b-table>
-                            </div>
+                                    <div class="text-center" v-if="loader">
+                                        <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                                    </div>
+                                </div>
                         </template>
                     </card>
                 </div>
@@ -56,9 +53,10 @@
 import {mapState} from 'vuex'
 import axios from 'axios'
 import RegistrarFactura from './registrar.vue'
+
 export default {
     components: {
-        RegistrarFactura,
+        RegistrarFactura
     },
     data() {
       return {
@@ -81,7 +79,7 @@ export default {
         unidadesMedida: [],
         verTabla: false,
         valor: false,
-        cargando: false
+        loader: false
       }
     },
     computed: {
@@ -147,28 +145,19 @@ export default {
             console.log(value)
             //this.verModalEditar = value
         },
-        async apiCargos () {
-            const c = (await axios.get(this.servidorProducto + '/usuarios/cargos')).data.data
-            const self = this
-            c.forEach(function (cargo) {
-                const aux = {
-                    ...cargo,
-                    text: cargo.nombre,
-                    value: cargo.id
-                }
-                console.log(aux)
-                self.cargos.push(aux)
-            })
-        },
         async apiFacturas () {
-            this.cargando = true
+            this.loader = true
             this.verTabla = false
             this.productos = []
             this.verModalEditar = []
             const self = this
             const arrayProducto = []
             try {
-                this.facturas = (await axios.get(this.servidorFactura + '/factura/factura')).data.data
+                this.facturas = (await axios.get(this.servidorFactura + '/factura/factura',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
                 this.facturas.forEach(function (item) {
                     const p = {
                         ...item.factura,
@@ -179,7 +168,7 @@ export default {
             } catch (error) {
                 console.log(error)
             } finally {
-                this.cargando = false
+                this.loader = false
             }
             this.productos = arrayProducto
             this.verTabla = true

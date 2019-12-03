@@ -12,7 +12,10 @@
                             </div>
                         </div>
                         <template>
-                            <div class="row">
+                            <div class="text-center" v-if="loader">
+                                <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                            </div>
+                            <div class="row" v-if="!loader">
                                 <div class="col-lg-4">
                                     <base-input label="Cargos">
                                         <b-form-select class="form-control" v-model="cargoSeleccionado" :options="cargos">
@@ -70,7 +73,8 @@ export default {
         verModal: false,
         cargos: [],
         permisos: undefined,
-        cargoSeleccionado: ''
+        cargoSeleccionado: '',
+        loader: false
       }
     },
     computed: {
@@ -94,24 +98,16 @@ export default {
                     })
                 } */
         },
-        'model.id': {
-            handler: async function () {
-                
-            }
-        },
         'model.permisos': function () {
             this.mostrarTabla = true
             this.$refs.tabla.clearSelected()
             const self = this
-            console.log('entre ----')
             let index = -1
             if (this.model.permisos === undefined) {
                 return
             }
             this.model.permisos.forEach(function (per) {
                 index = -1
-                console.log('----------------')
-                console.log('')
                 const encontrado = self.permisos.find(function (p) {
                     index++
                     console.log(p.id + ' - ' + per)
@@ -133,7 +129,6 @@ export default {
             items.forEach(element => {
                 this.model.permisos.push(element.id)
             })
-            console.log('seleccionado ' + this.model.permisos)
         },
         async asignarPermisos () {
             const self = this
@@ -153,7 +148,11 @@ export default {
             this.verModal = value
         },
         async apiCargos () {
-            const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             c.forEach(function (cargo) {
                 const aux = {
@@ -166,8 +165,11 @@ export default {
             })
         },
         async apiPermisos () {
-            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
-            console.log(this.permisos)
+            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         crearCargo () {
             this.$router.push('cargo/registrar')
@@ -189,9 +191,11 @@ export default {
             this.$router.push('usuario/')
         }
     },
-    created () {
-        this.apiCargos()
-        this.apiPermisos()
+    async created () {
+        this.loader = true
+        await this.apiCargos()
+        await this.apiPermisos()
+        this.loader = false
     }
 }
 </script>

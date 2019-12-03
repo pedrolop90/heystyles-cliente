@@ -25,11 +25,14 @@ import BootstrapVue from 'bootstrap-vue'
 import store from './store'
 import CxltToastr from 'cxlt-vue2-toastr'
 import 'cxlt-vue2-toastr/dist/css/cxlt-vue2-toastr.css'
+import 'vue-loaders/dist/vue-loaders.css';
+import VueLoaders from 'vue-loaders';
 
 Vue.config.productionTip = false
 Vue.prototype.$http = axios
 Vue.use(ArgonDashboard)
 Vue.use(BootstrapVue)
+Vue.use(VueLoaders);
 
 var toastrConfigs = {
   position: 'top right',

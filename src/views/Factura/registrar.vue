@@ -11,7 +11,10 @@
                                 </div>
                             </div>
                         </div>
-                        <template>
+                        <div class="text-center" v-if="loader">
+                            <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                        </div>
+                        <template v-if="!loader">
                             <form @submit.prevent>
                                 <h6 class="heading-small text-muted mb-4">Información de la Factura</h6>
                                 <div class="pl-lg-4">
@@ -91,7 +94,13 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <b-table striped hover :fields="camposTablaItemsProducto" :items="model.productos" responsive="sm" selected-variant="active">
+                                    <b-table
+                                        striped
+                                        hover
+                                        :fields="camposTablaItemsProducto"
+                                        :items="model.productos"
+                                        selected-variant="active"
+                                        responsive>
                                         <template slot="quitar" slot-scope="data">
                                             <b-button
                                                 variant="outline-warning"
@@ -303,7 +312,8 @@ import 'vue-simple-suggest/dist/styles.css'
         itemSeleccionadoAutocomplete: {},
         mostrarSelectorMarca: false,
         estados: ESTADOS,
-        limpiarAutocomplete: false
+        limpiarAutocomplete: false,
+        loader: false
       }
     },
     computed: {
@@ -583,11 +593,19 @@ import 'vue-simple-suggest/dist/styles.css'
             return false
         },
         async apiProductos () {
-            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
+            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         async listarProdedores () {
             this.proveedores = []
-            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores')).data.data
+            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         calcularTotalFactura () {
             if (this.model.productos.length === 0) {
@@ -634,9 +652,11 @@ import 'vue-simple-suggest/dist/styles.css'
         },
         
     },
-    created: function() {
-        this.apiProductos()
-        this.listarProdedores()
+    created: async function() {
+        this.loader = true
+        await this.apiProductos()
+        await this.listarProdedores()
+        this.loader = false
     }
   }
 </script>

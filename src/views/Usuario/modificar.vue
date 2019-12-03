@@ -263,7 +263,11 @@ import axios from 'axios'
             this.$router.push('/usuario/')
         },
         async apiCargos () {
-            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         limpiarCampos () {
             this.model = {

@@ -53,7 +53,8 @@ export default {
             nombre: '',
             idSecurity: null,
             nivel: 0,
-            permisos: []
+            permisos: [],
+            estado: 'ACTIVO'
         },
         columnasPermisos: [
             {key: 'nombre', label: 'Nombre'},
@@ -125,11 +126,18 @@ export default {
             this.verModal = value
         },
         async apiCargos () {
-            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos')).data.data
+            this.cargos = (await axios.get(this.servidorAcceso + '/usuarios/cargos',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         async apiPermisos () {
-            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
-            console.log(this.permisos)
+            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         }
     },
     created () {

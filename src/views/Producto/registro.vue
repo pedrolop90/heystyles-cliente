@@ -15,7 +15,10 @@
                             <form @submit.prevent>
                                 <h6 class="heading-small text-muted mb-4">Información del Producto</h6>
                                 <div class="pl-lg-4">
-                                    <div class="row">
+                                    <div class="text-center" v-if="loader">
+                                        <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                                    </div>
+                                    <div class="row" v-if="!loader">
                                         <div class="col-lg-9">
                                             <base-input alternative=""
                                                 label="Producto"
@@ -132,7 +135,8 @@ import 'vue-simple-suggest/dist/styles.css'
             { idProducto: 2, nombre: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', descripcion: 'Rollo de tela de Suela color negro calibre 86 X 100 METROS', unidadMedida: 'MTR', stockMinimo: '100' }
         ],
         marcaSeleccionada: undefined,
-        stockMinimo: undefined
+        stockMinimo: undefined,
+        loader: false
       }
     },
     computed: {
@@ -297,11 +301,19 @@ import 'vue-simple-suggest/dist/styles.css'
             console.log(this.model)
         },
         async apiProductos () {
-            this.itemsProductos = (await axios.get(this.servidorProducto + '/producto/producto')).data.data
+            this.itemsProductos = (await axios.get(this.servidorProducto + '/producto/producto', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         async apiMarcas () {
             this.marcas = []
-            const m = (await axios.get(this.servidorProducto + '/producto/marca')).data.data
+            const m = (await axios.get(this.servidorProducto + '/producto/marca', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             m.forEach(function (marca) {
                 const aux = {
@@ -319,9 +331,11 @@ import 'vue-simple-suggest/dist/styles.css'
             
         }
     },
-    created () {
-        this.apiProductos()
-        this.apiMarcas()
+    async created () {
+        this.loader = true
+        await this.apiProductos()
+        await this.apiMarcas()
+        this.loader = false
     }
   }
 </script>

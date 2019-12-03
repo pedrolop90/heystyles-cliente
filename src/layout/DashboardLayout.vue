@@ -29,12 +29,14 @@
   import ContentFooter from './ContentFooter.vue';
   import { FadeTransition } from 'vue2-transitions';
   import {mapState} from 'vuex'
+  import axios from 'axios'
 
   export default {
     components: {
       DashboardNavbar,
       ContentFooter,
-      FadeTransition
+      FadeTransition,
+      axios
     },
     data() {
       return {
@@ -49,7 +51,16 @@
       }
     },
     computed: {
-      ...mapState(['menu'])
+      ...mapState(['menu', 'sesionActiva'])
+    },
+    created () {
+      this.toggleSidebar()
+      if (this.sesionActiva === undefined) {
+        this.$router.push('/')
+        return
+      } else {
+        axios.defaults.headers.common['usuario'] = this.sesionActiva.numeroDocumento
+      }
     }
   };
 </script>

@@ -42,6 +42,9 @@
                                             {{ data.item.unidadMedida.abreviatura }}
                                         </template>
                                 </b-table>
+                                <div class="text-center" v-if="loader">
+                                    <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                                </div>
                             </div>
                         </template>
                     </card>
@@ -83,7 +86,8 @@ export default {
         marcaSeleccionado: '',
         unidadesMedida: [],
         verTabla: false,
-        valor: false
+        valor: false,
+        loader: false
       }
     },
     computed: {
@@ -168,7 +172,11 @@ export default {
             //this.verModalEditar = value
         },
         async apiCargos () {
-            const c = (await axios.get(this.servidorProducto + '/usuarios/cargos')).data.data
+            const c = (await axios.get(this.servidorProducto + '/usuarios/cargos', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             c.forEach(function (cargo) {
                 const aux = {
@@ -185,7 +193,11 @@ export default {
             this.verModalEditar = []
             const self = this
             const arrayProducto = []
-            this.productos = (await axios.get(this.servidorProducto + '/producto/producto')).data.data
+            this.productos = (await axios.get(this.servidorProducto + '/producto/producto', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             this.productos.forEach(function (item) {
                 const p = {
                     ...item,
@@ -257,7 +269,11 @@ export default {
         },
         async apiUnidadesMedidas () {
             this.unidadesMedida = []
-            const u = (await axios.get(this.servidorProducto + '/producto/unidad-medida')).data.data
+            const u = (await axios.get(this.servidorProducto + '/producto/unidad-medida', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             console.log(u)
             u.forEach(function (medida) {
@@ -268,9 +284,11 @@ export default {
             })
         }
     },
-    created () {
-        this.apiProductos()
-        this.apiUnidadesMedidas()
+    async created () {
+        this.loader = true
+        await this.apiProductos()
+        await this.apiUnidadesMedidas()
+        this.loader = false
     }
 }
 </script>

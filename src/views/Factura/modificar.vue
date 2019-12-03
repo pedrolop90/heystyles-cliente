@@ -7,11 +7,14 @@
                         <div slot="header" class="bg-white border-0">
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h3 class="mb-0">Registro de Facturas</h3>
+                                    <h3 class="mb-0">Edición de Factura</h3>
                                 </div>
                             </div>
                         </div>
-                        <template>
+                        <div class="text-center" v-if="loader">
+                            <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                        </div>
+                        <template v-if="!loader">
                             <form @submit.prevent>
                                 <h6 class="heading-small text-muted mb-4">Información de la Factura</h6>
                                 <div class="pl-lg-4">
@@ -51,7 +54,7 @@
                                                     :list="itemsProductos"
                                                     :filter-by-query="true"
                                                     :max-suggestions="10"
-                                                    :min-length="3"
+                                                    :min-length="1"
                                                     value-attribute="id"
                                                     display-attribute="producto.nombre"
                                                     @select="seleccionar"
@@ -84,7 +87,16 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <b-table striped hover selectable :fields="camposTablaItemsProducto" :items="model.productos" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single">
+                                    <b-table
+                                        striped
+                                        hover
+                                        selectable
+                                        :fields="camposTablaItemsProducto"
+                                        :items="model.productos"
+                                        @row-selected="seleccionado"
+                                        selected-variant="active"
+                                        select-mode="single"
+                                        responsive>
                                         <template slot="quitar" slot-scope="data">
                                             <b-button
                                                 variant="outline-warning"
@@ -125,7 +137,10 @@
                                         </template>
                                         <template slot="estadoEntrada" slot-scope="data">
                                             <base-input>
-                                                <select v-model="data.item.estadoEntrada" class="form-control form-control-sm" style="min-width: 130px !important">
+                                                <select v-model="data.item.estadoEntrada"
+                                                    class="form-control form-control-sm"
+                                                    style="min-width: 130px !important"
+                                                     >
                                                     <option v-for="item in estados" :key="item.id" :value="item.id" >{{ item.text }}</option>
                                                 </select>
                                             </base-input>
@@ -295,7 +310,8 @@ import 'vue-simple-suggest/dist/styles.css'
         itemSeleccionadoAutocomplete: {},
         mostrarSelectorMarca: false,
         estados: ESTADOS,
-        limpiarAutocomplete: false
+        limpiarAutocomplete: false,
+        loader: false
       }
     },
     computed: {
@@ -389,6 +405,12 @@ import 'vue-simple-suggest/dist/styles.css'
                     self.$toast.info({
                         title: 'Datos Incompletos',
                         message: 'Existen Descuentos invalidos en los productos'
+                    })
+                    valoresValidos = false
+                } else if (self.validarEstado(producto.estadoEntrada)) {
+                    self.$toast.info({
+                        title: 'Datos Incompletos',
+                        message: 'Debe expecificar un estado para cada producto'
                     })
                     valoresValidos = false
                 }
@@ -490,11 +512,11 @@ import 'vue-simple-suggest/dist/styles.css'
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
-                id: suggest.id,
+                marcaProductoId: suggest.id,
                 nombre: suggest.producto.nombre,
                 marcaProductoId: suggest.marcaProductoId,
                 marca: suggest.marca,
-                estadoEntrada: suggest.producto.estadoEntrada,
+                estadoEntrada: 'BUEN_ESTADO',
                 unidadMedida: suggest.producto.unidadMedida,
                 cantidad: 0,
                 porcentajeDescuento: 0,
@@ -507,11 +529,10 @@ import 'vue-simple-suggest/dist/styles.css'
             this.limpiarAutocomplete = true
             this.itemSeleccionadoAutocomplete = {
                 cod: suggest.id,
-                id: suggest.id,
+                marcaProductoId: suggest.id,
                 nombre: suggest.producto.nombre,
-                marcaProductoId: suggest.marcaProductoId,
-                marca: suggest.marca,
-                estadoEntrada: suggest.producto.estadoEntrada,
+                marca: suggest.marca.nombre,
+                estadoEntrada: 'BUEN_ESTADO',
                 unidadMedida: suggest.producto.unidadMedida,
                 cantidad: 0,
                 porcentajeDescuento: 0,
@@ -565,12 +586,26 @@ import 'vue-simple-suggest/dist/styles.css'
             }
             return false
         },
+        validarEstado (valor) {
+            if (valor === '' || valor === undefined ) {
+                return false
+            }
+            return false
+        },
         async apiProductos () {
-            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto')).data.data
+            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         async listarProdedores () {
             this.proveedores = []
-            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores')).data.data
+            this.proveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         calcularTotalFactura () {
             if (this.model.productos.length === 0) {
@@ -597,7 +632,11 @@ import 'vue-simple-suggest/dist/styles.css'
             this.model.id = this.facturaOriginal.id
             this.model.fechaLimitePago =  moment(this.facturaOriginal.fechaLimitePago,'YYYY-MM-DD').format('YYYY-MM-DD')
             // /gestion-producto/{facturaId}/extended
-            const lista = (await axios.get(this.servidorFactura + 'factura/gestion-producto/' + this.facturaOriginal.id + '/extended')).data.data
+            const lista = (await axios.get(this.servidorFactura + 'factura/gestion-producto/' + this.facturaOriginal.id + '/extended',{
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             lista.forEach(function (item) {
                 const productoFiltrado = self.itemsProductos.find(function (producto, index) {
@@ -640,9 +679,11 @@ import 'vue-simple-suggest/dist/styles.css'
         }
     },
     created: async function() {
+        this.loader = true
         await this.apiProductos()
         await this.listarProdedores()
         await this.prepararFactura()
+        this.loader = false
     }
   }
 </script>

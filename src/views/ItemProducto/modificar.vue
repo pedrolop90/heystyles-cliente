@@ -33,7 +33,7 @@
                                     addon-left-icon="fa fa-list-ul"
                                     :valid="validarUnidadMedida">
                             <select class="form-control" v-model="model.unidadMedidaId">
-                                <option v-for="item in unidadesMedida" :key="item.id" :value="item.id" >{{ item.nombre }}</option>
+                                <option v-for="item in unidadesMedidaProp" :key="item.id" :value="item.id" >{{ item.nombre }}</option>
                             </select>
                         </base-input>
                         <div class="text-left text-muted mb-4" style="margin-bottom: 0px !important;">

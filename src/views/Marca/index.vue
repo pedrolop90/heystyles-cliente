@@ -32,6 +32,9 @@
                                             </base-button>
                                         </template>
                                 </b-table>
+                                <div class="text-center" v-if="loader">
+                                    <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                                </div>
                             </div>
                         </template>
                     </card>
@@ -65,7 +68,8 @@ export default {
         verModal: false,
         marcas: [],
         permisos: undefined,
-        marcaSeleccionado: ''
+        marcaSeleccionado: '',
+        loader: false
       }
     },
     computed: {
@@ -111,7 +115,11 @@ export default {
             this.verModal = value
         },
         async apiMarcas () {
-            const m = (await axios.get(this.servidorProducto + '/producto/marca')).data.data
+            const m = (await axios.get(this.servidorProducto + '/producto/marca', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             const self = this
             m.forEach(function (marca) {
                 const aux = {
@@ -124,8 +132,11 @@ export default {
             })
         },
         async apiPermisos () {
-            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos')).data.data
-            console.log(this.permisos)
+            this.permisos = (await axios.get(this.servidorSeguridad + 'Permisos', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
         },
         crearMarca () {
             this.$router.push('marca/registrar')
@@ -176,9 +187,11 @@ export default {
             this.$router.push('/marca/')
         },
     },
-    created () {
-        this.apiMarcas()
+    async created () {
+        this.loader = true
+        await this.apiMarcas()
         // this.apiPermisos()
+        this.loader = false
     }
 }
 </script>

@@ -27,6 +27,9 @@
                             <b-table striped hover selectable :fields="camposTablaUsuario" :items="itemsUsuarios" @row-selected="seleccionado" responsive="sm" selected-variant="active" select-mode="single" >
                                 
                             </b-table>
+                            <div class="text-center" v-if="loader">
+                                <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                            </div>
                         </template>
                     </card>
                 </div>
@@ -70,7 +73,7 @@ import Modificar from './modificar'
             {id: '1', nombre: 'Gerente'},
             {id: '2', nombre: 'Secretaria'},
             {id: '3', nombre: 'Bodeguero'}
-        ]
+        ], loader: false
       }
     },
     computed: {
@@ -82,8 +85,11 @@ import Modificar from './modificar'
             this.formatearItemsAux( usuarios )
         },
         async listar () {
-            const headers = { usuario: this.sesionActiva.numeroDocumento}
-            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios')).data.data
+            const usuarios = (await axios.get(this.servidorAcceso + 'usuarios/usuarios', {
+                params: {
+                    estado: 'ACTIVO'
+                }
+            })).data.data
             this.formatearItems( usuarios )
         },
         abrirFormularioRegistro () {
@@ -129,8 +135,10 @@ import Modificar from './modificar'
     },
     watch: {
     },
-    created: function() {
-        this.listar()
+    created: async function() {
+        this.loader = true
+        await this.listar()
+        this.loader = false
     }
   }
 </script>

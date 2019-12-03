@@ -14,7 +14,10 @@
                         <template>
                             <form @submit.prevent>
                                 <h6 class="heading-small text-muted mb-4">Información del Proveedor</h6>
-                                <div class="pl-lg-4">
+                                <div class="text-center" v-if="loader">
+                                    <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                                </div>
+                                <div class="pl-lg-4" v-if="!loader">
                                     <div class="row">
                                         <div class="col-lg-4">
                                             <base-input alternative=""
@@ -181,7 +184,8 @@ import axios from 'axios'
             { key: 'email', label: 'Email' },
             { key: 'telefono', label: 'Telefono' },
             'Quitar'
-        ]
+        ],
+        loader: false
       }
     },
     computed: {
@@ -387,12 +391,14 @@ import axios from 'axios'
         }
     },
     async created () {
+        this.loader = true
         const info = (await axios.get(this.servidorAcceso + 'usuarios/proveedores/' + this.proveedorOriginal.id)).data.data
         this.model = {
             ...info.proveedor,
             contactos: info.contactos,
             cuentasBanco: info.cuentasBanco
         }
+        this.loader = false
     }
   }
 </script>

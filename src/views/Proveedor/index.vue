@@ -20,7 +20,9 @@
                                 </base-button>
                             </div>
                             <b-table striped hover selectable :fields="camposTablaProveedor" :items="itemsProveedores" @row-selected="seleccionado"/>
-                            
+                            <div class="text-center" v-if="loader">
+                                <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                            </div>
                         </template>
                     </card>
                 </div>
@@ -53,7 +55,8 @@ import axios from 'axios'
             { key: 'direccion', label: 'Dirección' },
             { key: 'telefono', label: 'Telefono' },
             { key: 'email', label: 'Correo' }
-        ]
+        ],
+        loader: false
       }
     },
     computed: {
@@ -61,7 +64,7 @@ import axios from 'axios'
     },
     methods: {
         async consultar () {
-            this.itemsProveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores',{   
+            this.itemsProveedores = (await axios.get(this.servidorAcceso + 'usuarios/proveedores', {   
                 params: {
                     estado: 'ACTIVO', 
                 }
@@ -81,9 +84,11 @@ import axios from 'axios'
     },
     watch: {
     },
-    created: function() {
-        this.consultar()
+    created: async function() {
+        this.loader = true
+        await this.consultar()
         // this.itemsProveedores = this.proveedor
+        this.loader = false
     }
   }
 </script>
