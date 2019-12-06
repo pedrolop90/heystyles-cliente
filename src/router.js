@@ -133,7 +133,12 @@ export default new Router({
           name: 'modificarFactura',
           component: () => import('./views/Factura/modificar.vue'),
           props: (route) => ({ facturaOriginal: route.params.facturaOriginal })
-        }
+        },
+        {
+          path: 'posicion/',
+          name: 'posicionProducto',
+          component: () => import('./views/Posicion/index.vue')
+        },
       ]
     },
     {

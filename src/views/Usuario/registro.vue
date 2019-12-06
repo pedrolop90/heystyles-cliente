@@ -90,6 +90,18 @@
                                                 </flat-picker>
                                             </base-input>
                                         </div>
+                                        <div class="col-lg-4">
+                                            <base-input alternative=""
+                                                        label="Foto de Usuario"
+                                                        input-classes="form-control-alternative">
+                                                <b-form-file
+                                                    @change="ingresoFile"
+                                                    class="btn btn-primary btn-sm" plain
+                                                    accept=".jpg, .png, .gif, .jpeg"
+                                                    placeholder="Escojer foto..."
+                                                    browse-text="Buscar"/>
+                                            </base-input>
+                                        </div>
                                     </div>
                                     <div class="text-right" >
                                         <base-button outline @click="registrar()" type="success">Registrar Usuario</base-button>
@@ -132,6 +144,12 @@ import axios from 'axios'
           idPersona: null,
           telefono: undefined
         },
+        fotografia: {
+            base64: '',
+            id: null,
+            extension: ''
+        },
+        imagen: undefined,
         tiposDocumento: TIPO_DOCUMENTO,
         cargos: undefined,
         cargosAux: [
@@ -219,7 +237,41 @@ import axios from 'axios'
         }
     },
     methods: {
+        ingresoFile (event) {
+            this.imagen = event.target.files[0]
+        },
+        subirImagen () {
+            const file = this.imagen
+            let reader = new FileReader()
+            const self = this
+            let cadena = ''
+            this.fotografia.extension = file.type
+            let variable = '---'
+            console.log('2')
+            reader.onloadend = (file) => {
+                self.actualizarFoto(reader.result)
+            }
+            variable = reader.readAsDataURL(file)
+            console.log(variable + ' aa')
+        },
+        async actualizarFoto ( base64) {
+            console.log( base64)
+            const parametros = {
+                extension: this.fotografia.extension,
+                id: null,
+                base64: base64
+            }
+            await axios.put(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia', {
+                ...parametros
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Se actualizo la foto con exito'
+                })
+            ))
+        },
         async registrar () {
+            console.log(this.imagen)
             if (!this.validacion()) {
                 this.$toast.info({
                     title: 'No se puede registrar el usuario',
@@ -227,6 +279,7 @@ import axios from 'axios'
                 })
                 return
             }
+            const self = this
             axios.post(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
             })
@@ -235,6 +288,7 @@ import axios from 'axios'
                     title: 'Registro Exitoso',
                     message: 'Se actualizo el usuario correctamente'
                 })
+                self.subirImagen()
                 this.$router.push('/usuario/')
             })
             .catch(error => {

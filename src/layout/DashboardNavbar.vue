@@ -9,7 +9,7 @@
                 <base-dropdown class="nav-link pr-0">
                     <div class="media align-items-center" slot="title">
                 <span class="avatar avatar-sm rounded-circle">
-                  <i class="ni ni-circle-08 ni-3x" aria-hidden="true"></i>
+                  <foto :imagen="fotografia.base64" :extension="fotografia.extension" v-if="verImagen"/>
                 </span>
                         <div class="media-body ml-2 d-none d-lg-block">
                             <span class="mb-0 text-sm  font-weight-bold">{{sesionActiva.nombres}}</span>
@@ -43,16 +43,27 @@
 </template>
 <script>
 import {mapState} from 'vuex'
+import foto from '@/views/Perfil/foto'
+import axios from 'axios'
   export default {
+    components: {
+      foto
+    },
     data() {
       return {
         activeNotifications: false,
         showMenu: false,
-        searchQuery: ''
+        searchQuery: '',
+        fotografia: {
+          id: undefined,
+          base64: undefined,
+          extension: undefined
+        },
+        verImagen: false
       };
     },
     computed: {
-      ...mapState(['sesionActiva'])
+      ...mapState(['servidorAcceso','sesionActiva'])
     },
     methods: {
       toggleSidebar() {
@@ -64,6 +75,18 @@ import {mapState} from 'vuex'
       toggleMenu() {
         this.showMenu = !this.showMenu;
       }
+    },
+    created: async function() {
+      this.verImagen = false
+      const foto = (await axios.get(this.servidorAcceso + 'usuarios/personas/' + this.sesionActiva.numeroDocumento + '/fotografia')).data.data
+      this.fotografia = {
+        ...foto
+      }
+      this.verImagen = true
+      console.log('fotografia')
+      console.log(this.fotografia)
+      console.log('foto')
+      console.log(foto)
     }
   };
 </script>

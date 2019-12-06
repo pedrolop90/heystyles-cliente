@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper" :class="{ 'nav-open': $sidebar.showSidebar }">
+  <div class="scroll-wrapper scrollbar-inner">
     <side-bar
       :background-color="sidebarBackground"
       short-title="Argon"

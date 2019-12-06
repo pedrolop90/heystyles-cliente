@@ -11,9 +11,17 @@
                                 </div>
                             </div>
                         </div>
-                        <template>
+                        <div class="text-center" v-if="loader">
+                            <vue-loaders name="ball-beat" color="blue" scale="2" class="text-center"></vue-loaders>
+                        </div>
+                        <template v-if="sesionActiva !== undefined && sesionActiva !== null && !loader">
                             <form @submit.prevent>
                                 <div class="pl-lg-4">
+                                    <b-row class="justify-content-md-center">
+                                        <div class="col-lg-2 form-group">
+                                            <foto :imagen="fotografia.base64" :extension="fotografia.extension" />
+                                        </div>
+                                    </b-row>
                                     <div class="row">
                                         <div class="col-lg-4">
                                             <base-input alternative=""
@@ -90,9 +98,22 @@
                                                 </flat-picker>
                                             </base-input>
                                         </div>
+                                        <div class="col-lg-4">
+                                            <base-input alternative=""
+                                                        label="Cambiar Foto de Usuario"
+                                                        input-classes="form-control-alternative">
+                                                <b-form-file
+                                                    v-model="imagen"
+                                                    @change="seleccionarImagen"
+                                                    class="btn btn-primary btn-sm" plain
+                                                    accept=".jpg, .png, .gif, .jpeg"
+                                                    placeholder="Escojer foto..."
+                                                    browse-text="Buscar"/>
+                                            </base-input>
+                                        </div>
                                     </div>
                                     <div class="text-right" >
-                                        <base-button outline @click="eliminar()" type="danger">Dar de baja</base-button>
+                                        <base-button outline @click="eliminar()" type="danger">Deshabilitar</base-button>
                                         <base-button outline @click="guardarCambios()" type="success">Guardar Cambios</base-button>
                                     </div>
                                 </div>
@@ -114,9 +135,11 @@ import 'flatpickr/dist/flatpickr.css'
 import moment from 'moment'
 import {mapState} from 'vuex'
 import axios from 'axios'
+import foto from '@/views/Perfil/foto'
   export default {
     components: {
-      flatPicker
+      flatPicker,
+      foto
     },
     name: 'modificar',
     props: {
@@ -139,13 +162,20 @@ import axios from 'axios'
           idPersona: null,
           telefono: ''
         },
+        fotografia: {
+            base64: undefined,
+            extension: undefined,
+            id: undefined
+        },
         tiposDocumento: TIPO_DOCUMENTO,
         cargos: undefined,
         cargosAux: [
             {id: '1', nombre: 'Gerente'},
             {id: '2', nombre: 'Secretaria'},
             {id: '3', nombre: 'Bodeguero'}
-        ]
+        ],
+        imagen: undefined,
+        loader: false
       }
     },
     computed: {
@@ -226,6 +256,34 @@ import axios from 'axios'
         }
     },
     methods: {
+        async seleccionarImagen(event) {
+            const file = event.target.files[0]
+            console.log(file)
+            let reader = new FileReader()
+            const self = this
+            let cadena = ''
+            this.fotografia.extension = file.type
+            reader.onloadend = (file) => {
+                self.actualizarFoto(reader.result)
+            }
+            reader.readAsDataURL(file)
+        },
+        async actualizarFoto ( base64) {
+            console.log( base64)
+            const parametros = {
+                extension: this.fotografia.extension,
+                id: this.fotografia.id,
+                base64: base64
+            }
+            await axios.put(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia', {
+                ...parametros
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Se actualizo la foto con exito'
+                })
+            ))
+        },
         async guardarCambios () {
             if (!this.validacion()) {
                 this.$toast.info({
@@ -315,13 +373,21 @@ import axios from 'axios'
             return false
         }
     },
-    created: function() {
+    async created () {
+        this.loader = true
         this.apiCargos()
         this.model = {
             ...this.usuario
         }
-        console.log(this.model)
-        console.log(this.sesionActiva)
+        try {
+            const fotografia = (await axios.get(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia')).data.data
+            this.fotografia = {
+                ...fotografia
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        this.loader = false
     }
   }
 </script>

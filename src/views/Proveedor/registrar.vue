@@ -235,7 +235,7 @@ import axios from 'axios'
                 return false
             }
             return false
-        },
+        }
     },
     methods: {
         async registrar () {

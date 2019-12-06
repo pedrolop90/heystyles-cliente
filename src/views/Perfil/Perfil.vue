@@ -16,88 +16,107 @@
                         </div>
                         <template v-if="sesionActiva !== undefined && sesionActiva !== null && !loader">
                             <form @submit.prevent>
-                                <div class="pl-lg-4">
-                                    <div class="row">
+                                <div class="card card-profile shadow">
+                                    <b-row class="justify-content-md-center">
+                                        <div class="col-lg-2 form-group">
+                                            <foto :imagen="fotografia.base64" :extension="fotografia.extension" />
+                                        </div>
+                                    </b-row>
+                                    <b-row class="justify-content-md-center">
+                                        <div class="col-lg-3 form-group">
+                                            <div class="input-group input-group-sm">
+                                                <b-form-file
+                                                    accept="image/jpeg, image/png, image/gif"
+                                                    @change="onFileSelected"
+                                                    placeholder="Escojer foto..."
+                                                    browse-text="Buscar"
+                                                    class="form-control form-control-sm"/>
+                                            </div>
+                                        </div>
+                                    </b-row>
+                                    <div class="card-body pt-0 pt-md-4">
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Nombres"
+                                                            placeholder="Nombres"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.nombres"
+                                                            :valid="validarNombres"
+                                                            ref="nombre"
+                                                />
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Apellidos"
+                                                            placeholder="Apellidos"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.apellidos"
+                                                            :valid="validarApellidos"
+                                                />
+                                            </div>
                                         <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Nombres"
-                                                        placeholder="Nombres"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.nombres"
-                                                        :valid="validarNombres"
-                                                        ref="nombre"
-                                            />
+                                                <base-input alternative=""
+                                                    label="Cargo"
+                                                    input-classes="form-control-alternative"
+                                                    v-model="cargo"
+                                                    disabled
+                                                />
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input label="Tipo Documento" :valid="validarTipoDocumento">
+                                                    <select class="form-control" v-model="model.tipoDocumento">
+                                                        <option v-for="item in tiposDocumento" :key="item.value" :value="item.value" >{{ item.text }}</option>
+                                                    </select>
+                                                </base-input>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Documento"
+                                                            placeholder="N. Documento"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.numeroDocumento"
+                                                            :valid="validarNumeroDocumento"
+                                                />
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Email"
+                                                            placeholder="heystyles@example.com"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.email"
+                                                            :valid="validarEmail"
+                                                />
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Telefono"
+                                                            placeholder="5 555 555"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.telefono"
+                                                            :valid="validarTelefono"
+                                                />
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <base-input alternative=""
+                                                            label="Fecha de Nacimiento"
+                                                            placeholder="Fecha de Nacimiento"
+                                                            input-classes="form-control-alternative"
+                                                            v-model="model.lastName"
+                                                            :valid="validarFechaNacimiento">
+                                                    <flat-picker slot-scope="{focus, blur}"
+                                                                @on-open="focus"
+                                                                @on-close="blur"
+                                                                :config="{allowInput: true}"
+                                                                class="form-control datepicker"
+                                                                v-model="model.fechaNacimiento">
+                                                    </flat-picker>
+                                                </base-input>
+                                            </div>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Apellidos"
-                                                        placeholder="Apellidos"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.apellidos"
-                                                        :valid="validarApellidos"
-                                            />
+                                        <div class="text-right" >
+                                            <base-button outline @click="actualizar()" type="success">Actualizar Información</base-button>
                                         </div>
-                                       <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                label="Cargo"
-                                                input-classes="form-control-alternative"
-                                                v-model="cargo"
-                                                disabled
-                                            />
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input label="Tipo Documento" :valid="validarTipoDocumento">
-                                                <select class="form-control" v-model="model.tipoDocumento">
-                                                    <option v-for="item in tiposDocumento" :key="item.value" :value="item.value" >{{ item.text }}</option>
-                                                </select>
-                                            </base-input>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Documento"
-                                                        placeholder="N. Documento"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.numeroDocumento"
-                                                        :valid="validarNumeroDocumento"
-                                            />
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Email"
-                                                        placeholder="heystyles@example.com"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.email"
-                                                        :valid="validarEmail"
-                                            />
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Telefono"
-                                                        placeholder="5 555 555"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.telefono"
-                                                        :valid="validarTelefono"
-                                            />
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <base-input alternative=""
-                                                        label="Fecha de Nacimiento"
-                                                        placeholder="Fecha de Nacimiento"
-                                                        input-classes="form-control-alternative"
-                                                        v-model="model.lastName"
-                                                        :valid="validarFechaNacimiento">
-                                                <flat-picker slot-scope="{focus, blur}"
-                                                            @on-open="focus"
-                                                            @on-close="blur"
-                                                            :config="{allowInput: true}"
-                                                            class="form-control datepicker"
-                                                            v-model="model.fechaNacimiento">
-                                                </flat-picker>
-                                            </base-input>
-                                        </div>
-                                    </div>
-                                    <div class="text-right" >
-                                        <base-button outline @click="actualizar()" type="success">Actualizar Información</base-button>
                                     </div>
                                 </div>
                             </form>
@@ -118,9 +137,11 @@ import 'flatpickr/dist/flatpickr.css'
 import moment from 'moment'
 import {mapState} from 'vuex'
 import axios from 'axios'
+import foto from './foto'
   export default {
     components: {
-      flatPicker
+      flatPicker,
+      foto
     },
     name: 'Perfil',
     data() {
@@ -137,6 +158,12 @@ import axios from 'axios'
           idPersona: 0,
           telefono: ''
         },
+        fotografia: {
+            base64: undefined,
+            extension: undefined,
+            id: undefined
+        },
+        selectedFile: null,
         tiposDocumento: TIPO_DOCUMENTO,
         cargos: undefined,
         cargosAux: [
@@ -145,7 +172,8 @@ import axios from 'axios'
             {id: '3', nombre: 'Bodeguero'}
         ],
         cargo: '',
-        loader: false
+        loader: false,
+        cadena: undefined
       }
     },
     computed: {
@@ -238,6 +266,34 @@ import axios from 'axios'
         }
     },
     methods: {
+        async onFileSelected(event) {
+            const file = event.target.files[0]
+            console.log(file)
+            let reader = new FileReader()
+            const self = this
+            let cadena = ''
+            this.fotografia.extension = file.type
+            reader.onloadend = (file) => {
+                self.actualizarFoto(reader.result)
+            }
+            reader.readAsDataURL(file)
+        },
+        async actualizarFoto ( base64) {
+            console.log( base64)
+            const parametros = {
+                extension: this.fotografia.extension,
+                id: this.fotografia.id,
+                base64: base64
+            }
+            await axios.put(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia', {
+                ...parametros
+            }).then(response => (
+                this.$toast.success({
+                    title: 'Actualizacion Exitosa',
+                    message: 'Se actualizo la foto con exito'
+                })
+            ))
+        },
         async actualizar () {
             if (!this.validacion()) {
                 this.$toast.info({
@@ -246,7 +302,7 @@ import axios from 'axios'
                 })
                 return
             }
-            axios.put(this.servidorAcceso + 'usuarios/usuarios', {
+            await axios.put(this.servidorAcceso + 'usuarios/usuarios', {
                 ...this.model
             }).then(response => (
                 this.$toast.success({
@@ -284,13 +340,17 @@ import axios from 'axios'
     },
     created: async function() {
         this.loader = true
-        await this.apiCargos()
+        // await this.apiCargos()
         if (this.sesionActiva) {
             this.model = {
                 ...this.sesionActiva
             }
         }
         const infoCargo = (await axios.get(this.servidorAcceso + 'usuarios/cargos/'+this.model.cargoId)).data.data
+        const fotografia = (await axios.get(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia')).data.data
+        this.fotografia = {
+            ...fotografia
+        }
         this.cargo = infoCargo.cargo.nombre
         this.loader = false
     }
