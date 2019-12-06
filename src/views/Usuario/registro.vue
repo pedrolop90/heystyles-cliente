@@ -288,7 +288,9 @@ import axios from 'axios'
                     title: 'Registro Exitoso',
                     message: 'Se actualizo el usuario correctamente'
                 })
-                self.subirImagen()
+                if (self.imagen) {
+                    self.subirImagen()
+                }
                 this.$router.push('/usuario/')
             })
             .catch(error => {
