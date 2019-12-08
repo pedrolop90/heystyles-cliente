@@ -24,7 +24,7 @@
                                                 <span class="h2 font-weight-bold mb-0 text-white my-2">{{ lugar.id}} - {{ lugar.nombre }}</span>
                                             </div>
                                             <b-button pill variant="success" @click="modificarLugarModal(lugar)">Modificar</b-button>
-                                            <b-button pill variant="info" >Gestionar</b-button>
+                                            <b-button pill variant="info" @click="gestionarLugar(lugar)" >Gestionar</b-button>
                                         </div>
                                     </div>
                                 </div>
@@ -70,6 +70,15 @@ export default {
     watch: {
     },
     methods: {
+        gestionarLugar (item) {
+           console.log(item)
+            this.$router.push({
+                name: 'gestionarPosicion',
+                params: {
+                    posicion: item
+                }
+            })
+        },
         modificarLugarModal (lugar) {
             console.log(lugar)
             this.verModalModificar = true
@@ -87,6 +96,14 @@ export default {
                     estado: 'ACTIVO'
                 }
             })).data.data
+            c.sort(function (a, b){
+                if (a.posicion > b.posicion) {
+                    return 1
+                } else if (a.posicion < b.posicion) {
+                    return -1
+                }
+                return 0
+            })
             this.model.lugares = c
         },
         async agregarLugar (informacion) {
@@ -121,7 +138,7 @@ export default {
                 ...informacion
             }
             const self = this
-            axios.put(this.servidorProducto + 'producto/lugar', {
+            await axios.put(this.servidorProducto + 'producto/lugar', {
                 ...marca
             })
             .then(response => {

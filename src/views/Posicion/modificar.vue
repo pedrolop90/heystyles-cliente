@@ -10,7 +10,7 @@
                   class="border-0">
                 <template>
                     <div class="text-center text-muted mb-4">
-                        <h2>Crear Posición</h2>
+                        <h2>Modificar Posición</h2>
                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                     </div>
                     <form role="form">
@@ -89,6 +89,9 @@ export default {
         },
         validarPosicion () {
             try {
+                if (this.model.posicion === '') {
+                    return false
+                }
                 if (this.model.posicion >= -100 && this.model.posicion <= 100) {
                     return true
                 }

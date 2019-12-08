@@ -52,7 +52,7 @@ export default {
             id: null,
             nombre: '',
             idSecurity: null,
-            nivel: 0,
+            nivel: 1,
             permisos: [],
             estado: 'ACTIVO'
         },

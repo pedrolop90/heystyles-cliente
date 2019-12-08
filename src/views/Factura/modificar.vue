@@ -90,12 +90,9 @@
                                     <b-table
                                         striped
                                         hover
-                                        selectable
                                         :fields="camposTablaItemsProducto"
                                         :items="model.productos"
-                                        @row-selected="seleccionado"
                                         selected-variant="active"
-                                        select-mode="single"
                                         responsive>
                                         <template slot="quitar" slot-scope="data">
                                             <b-button
@@ -426,10 +423,6 @@ import 'vue-simple-suggest/dist/styles.css'
                 return false
             }
             return false
-        },
-        seleccionado (item) {
-            this.model.idProducto = item[0].idProducto
-            this.model.nombre = item[0].nombre
         },
         async guardarCambios () {
             if (!this.validacion()) {
