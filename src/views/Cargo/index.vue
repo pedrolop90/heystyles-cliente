@@ -148,6 +148,7 @@ export default {
             this.verModal = value
         },
         async apiCargos () {
+            this.cargos = []
             const c = (await axios.get(this.servidorAcceso + '/usuarios/cargos',{
                 params: {
                     estado: 'ACTIVO'
@@ -174,7 +175,7 @@ export default {
         crearCargo () {
             this.$router.push('cargo/registrar')
         },
-        eliminarCargo () {
+        async eliminarCargo () {
             axios.delete(this.servidorAcceso + 'usuarios/cargos/' + this.model.id)
             .then(response => {
                 this.$toast.success({
@@ -188,7 +189,10 @@ export default {
                     message: error.response.data.errors[0].message
                 })
             })
-            this.$router.push('usuario/')
+            this.loader = true
+            await this.apiCargos()
+            this.loader = false
+            // this.$router.push('/usuario/')
         }
     },
     async created () {

@@ -135,9 +135,15 @@ export default new Router({
           props: (route) => ({ facturaOriginal: route.params.facturaOriginal })
         },
         {
-          path: 'posicion/',
-          name: 'posicionProducto',
+          path: 'almacen/',
+          name: 'Almacen',
           component: () => import('./views/Posicion/index.vue')
+        },
+        {
+          path: 'posicion/gestionar',
+          name: 'gestionarPosicion',
+          component: () => import('./views/Posicion/gestionar.vue'),
+          props: (route) => ({ posicion: route.params.posicion })
         },
       ]
     },

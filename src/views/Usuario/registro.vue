@@ -284,7 +284,6 @@ import axios from 'axios'
                 ...this.model
             })
             .then(response => {
-                console.log(response)
                 this.$toast.success({
                     title: 'Registro Exitoso',
                     message: 'Se actualizo el usuario correctamente'

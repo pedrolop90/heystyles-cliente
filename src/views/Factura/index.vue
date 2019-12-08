@@ -122,7 +122,6 @@ export default {
             items.forEach(element => {
                 this.model.permisos.push(element.id)
             })
-            console.log('seleccionado ' + this.model.permisos)
         },
         async asignarPermisos () {
             const self = this
