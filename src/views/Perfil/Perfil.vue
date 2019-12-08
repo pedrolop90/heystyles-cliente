@@ -293,6 +293,13 @@ import foto from './foto'
                     message: 'Se actualizo la foto con exito'
                 })
             ))
+            this.loader = true
+            // await this.apiCargos()
+            const fotografia = (await axios.get(this.servidorAcceso + 'usuarios/personas/' + this.model.numeroDocumento + '/fotografia')).data.data
+            this.fotografia = {
+                ...fotografia
+            }
+            this.loader = false
         },
         async actualizar () {
             if (!this.validacion()) {
