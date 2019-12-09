@@ -26,37 +26,37 @@
                                                 label="Valor"
                                                 placeholder="Valor del abono"
                                                 input-classes="form-control-alternative"
-                                                v-model="valorAbono"
+                                                v-model="model.valor"
                                                 min= 0
                                                 max= deuda
                                                 :valid="validarAbonos"
                                             />
                                         </div>
                                         <div class="col-lg-2">
-                                            <b-form-input
+                                            <base-input
                                                 disabled
                                                 alternative=""
                                                 type="number"
                                                 label="Deuda Total"
                                                 input-classes="form-control-alternative"
                                                 v-model="deuda"
-                                                min= 0
-                                                max= 1000
                                                 size="sm"
                                             />
                                         </div>
-                                        <div class="row float-right" >
-                                            <base-button outline @click="guardarCambios()" type="success">Registrar</base-button>
+                                        <div class="col-lg-2">
+                                            <div class="row float-right py-4" >
+                                                <base-button outline @click="registrar()" type="success">Registrar</base-button>
+                                            </div>
                                         </div>
                                     </div>
                                     <b-table
                                         striped
                                         hover
                                         :fields="camposTablaAbonos"
-                                        :items="productos"
+                                        :items="abonos"
                                         selected-variant="active"
                                         responsive>
-                                        <template slot="quitar" slot-scope="data">
+                                        <template slot="Quitar" slot-scope="data">
                                             <b-button
                                                 variant="outline-warning"
                                                 size="sm"
@@ -67,7 +67,7 @@
                                             </b-button>
                                         </template>
                                         <template slot="usuario" slot-scope="data">
-                                            {{data.item.usuario.nombres}} {{data.item.usuario.apelidos}} (<em>{{ data.item.usuario.numeroDocumento }}</em>)
+                                            {{data.item.usuario.nombres}} {{data.item.usuario.apelidos}} (<em>tel: {{ data.item.usuario.telefono }}</em>)
                                         </template>
                                     </b-table>
                                 </div>
@@ -98,12 +98,16 @@ import moment from 'moment'
         autocomplete: '',
         loading: false,
         model: {
-            abonos: []
+            facturaId: undefined,
+            id: null,
+            usuarioId: undefined,
+            valor: 0
         },
+        abonos: [],
         valorAbono: 0,
         camposTablaAbonos: [
+            { key: 'id', label: 'id' },
             { key: 'usuario', label: 'Usuario' },
-            { key: 'fecha_creacion', label: 'Fecha' },
             { key: 'valor', label: 'valor' },
             'Quitar'
         ],
@@ -118,7 +122,7 @@ import moment from 'moment'
         ...mapState(['servidorAcceso', 'servidorProducto', 'proveedor', 'servidorFactura', 'sesionActiva']),
         validarAbonos () {
             try {
-                if (this.model.abonos > 0 && this.model.abonos <= this.deuda) {
+                if (this.model.valor > 0 && this.model.valor <= this.deuda) {
                     return true
                 }
             } catch (error) {
@@ -128,21 +132,24 @@ import moment from 'moment'
         }
     },
     methods: {
-        async guardarCambios () {
+        async registrar () {
+            if (!this.validarAbonos) {
+                this.$toast.error({
+                    title: 'Abono no valido',
+                    message: 'El abono debe ser de 0 y menor que la deuda final'
+                })
+                return
+            }
             const self = this
-            this.model.marcaProductosIds = []
-            this.productos.forEach (function (producto) {
-                self.model.marcaProductosIds.push(producto.marcaProductoId)
-            })
-            axios.put(this.servidorProducto + 'producto/marca-prodcuto-lugar/lugar', {
-                ...this.model
+            axios.put(this.servidorFactura + 'factura/abonos', {
+                ...self.model
             })
             .then(response => {
                 this.$toast.success({
                     title: 'Actualizacion Exitosa',
                     message: 'Se actualizo la Posición correctamente'
                 })
-                self.$router.push('/almacen/')
+                self.$router.push('/factura/')
             })
             .catch(error => {
                 this.$toast.error({
@@ -152,36 +159,35 @@ import moment from 'moment'
             })
         },
         quitarProducto (codQuitar) {
+            axios.delete(this.servidorFactura + 'factura/abonos/' + codQuitar)
+            this.$toast.info({
+                title: 'Eliminado Correctamente',
+                message: 'Se ha eliminado correctamente el abono'
+            })
             const aux = []
-            this.model.abonos.forEach(function (abono) {
+            this.abonos.forEach(function (abono) {
                 if (abono.id !== codQuitar) {
-                    aux.push(producto)
+                    aux.push(abono)
                 }
             })
-            this.model.abonos = aux
-            recalcularDeuda()
-        },
-        recalcularDeuda () {
-            if (this.model.abonos.length > 0) {
-                const self = this
-                let valorTotal = 0
-                this.model.abonos.forEach(function (abono) {
-                    valorTotal += abono.valor
-                })
-                this.deuda = this.facturaOriginal.valor - valorTotal
-            }
-        },
-        agregarProducto () {
-            this.productos.push(this.itemSeleccionadoAutocomplete)
-            this.itemSeleccionadoAutocomplete = {}
-            this.autocomplete = ''
+            this.abonos = aux
         },
         async apiAbonos () {
-            this.itemsProductos = (await axios.get(this.servidorProducto + 'producto/marca-producto', {
+            const self = this
+            this.abonos = (await axios.get(this.servidorFactura + 'factura/abonos'/* ,{
                 params: {
-                    estado: 'ACTIVO'
+                    facturaId: self.facturaOriginal.id
                 }
-            })).data.data
+            }*/)).data.data
+            const aux = []
+            this.abonos.forEach(async  function (abono) {
+                if (abono.facturaId === self.facturaOriginal.id) {
+                    const usuario = (await axios.get(self.servidorAcceso + 'usuarios/usuarios/' + abono.usuarioId)).data.data
+                    abono.usuario = usuario
+                    aux.push(abono)
+                }
+            })
+            this.abonos = aux
         },
         limpiar () {
             if (this.limpiarAutocomplete) {
@@ -189,10 +195,29 @@ import moment from 'moment'
             }
         }
     },
-    watch: {},
+    watch: {
+        abonos () {
+            let i = 0
+            const self = this
+            let valorTotal = 0
+            this.abonos.forEach(function (abono) {
+                valorTotal += abono.valor
+                i++
+            })
+            if (i === 0) {
+                this.deuda = this.facturaOriginal.valorTotal
+            } else {
+                this.deuda = this.facturaOriginal.valorTotal - valorTotal
+            }
+        },
+    },
     created: async function() {
         this.loader = true
-        // await this.apiAbonos()
+        console.log('this.sesionActiva')
+        console.log(this.sesionActiva)
+        await this.apiAbonos()
+        this.model.usuarioId = this.sesionActiva.id
+        this.model.facturaId = this.facturaOriginal.id
         this.loader = false
     }
   }

@@ -145,6 +145,17 @@ export default new Router({
           component: () => import('./views/Posicion/gestionar.vue'),
           props: (route) => ({ posicion: route.params.posicion })
         },
+        {
+          path: 'factura/abono',
+          name: 'abonarFactura',
+          component: () => import('./views/Factura/abono.vue'),
+          props: (route) => ({ facturaOriginal: route.params.facturaOriginal })
+        },
+        {
+          path: 'notificacion/',
+          name: 'Notificacion',
+          component: () => import('./views/Notificacion/index.vue')
+        }
       ]
     },
     {

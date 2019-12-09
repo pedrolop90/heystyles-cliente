@@ -28,13 +28,13 @@
                                                 Editar
                                             </base-button>
                                         </template>
-                                        <template slot="Eliminar" slot-scope="data">
+                                        <template slot="Abonos" slot-scope="data">
                                             <base-button
                                                 outline
-                                                type="warning"
-                                                @click="eliminarProducto(data.item)"
-                                                v-b-popover.hover.top="'Eliminar Producto'">
-                                                <i class="fa fa-window-close fa-lg" aria-hidden="true"></i>
+                                                type="success"
+                                                @click="abonar(data.item)"
+                                                v-b-popover.hover.top="'Abonar a la factura'">
+                                                <i class="fa fa-credit-card" aria-hidden="true"></i>
                                             </base-button>
                                         </template>
                                 </b-table>
@@ -70,6 +70,7 @@ export default {
             { key: 'fechaCreacion', label: 'Fecha Registro' },
             { key: 'fechaLimitePago', label: 'Fecha Limite' },
             { key: 'valorTotal', label: 'Total' },
+            'Abonos'
         ],
         verModal: false,
         productos: [],
@@ -220,6 +221,15 @@ export default {
                 name: 'modificarFactura',
                 params: {
                     facturaOriginal: item[0]
+                }
+            })
+        },
+        abonar (item) {
+            console.log('item ' + item)
+            this.$router.push({
+                name: 'abonarFactura',
+                params: {
+                    facturaOriginal: item
                 }
             })
         }
