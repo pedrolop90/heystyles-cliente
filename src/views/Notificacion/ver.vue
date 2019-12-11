@@ -96,11 +96,10 @@ export default {
           ...this.notificacion
       }
       this.model.estado = 'LEIDO'
-      await axios.put(this.servidorNotificacion + '/notificaciones',{
-          params: {
-              ...this.model
-          }
-      })
+      const params = {
+            ...this.model
+        }
+      await axios.put(this.servidorNotificacion + '/notificaciones',params)
       console.log(this.model)
   }
 

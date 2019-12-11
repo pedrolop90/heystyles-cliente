@@ -50,6 +50,7 @@ export default {
   data() {
       return {
         notificaciones: [],
+        cantidad: 0,
         columnas: [
             { key: 'nombre', label: 'Asunto' },
             { key: 'descripcion', label: 'Descripción' },
@@ -61,10 +62,17 @@ export default {
       }
   },
   computed: {
-    ...mapState(['servidorNotificacion'])
+    ...mapState(['servidorNotificacion']),
+    notificaciones () {
+        if (notificaciones !== null) {
+
+            this.cantidad = this.notificaciones.length
+        }
+    }
   },
   methods: {
-      retroceder () {
+      async retroceder () {
+        await this.cargarNotificaciones()
         this.notificacionSeleccionado = undefined
       },
       seleccionado (item) {
