@@ -26,6 +26,7 @@
                                         id="exampleFormControlTextarea1"
                                         rows="3"
                                         placeholder="Descripción"
+                                        disabled
                                         v-model="descripcion">
                                     </textarea>
                                   </div>
@@ -47,6 +48,8 @@ const ESTADOS = [
     { estado: 'SIN_LEER', descripcion: 'NO LEIDO'},
     { estado: 'LEIDO', descripcion: 'LEIDO'}
 ]
+import axios from 'axios'
+import {mapState} from 'vuex'
 export default {
   props:{
       notificacion: {
@@ -58,12 +61,20 @@ export default {
   },
   data() {
       return {
+        model:{
+            descripcion: undefined,
+            estado: "SIN_LEER",
+            id: null,
+            nombre: '',
+            usuarioId: null
+        },
         descripcion: undefined,
         asusto: undefined,
         estados: ESTADOS
       }
   },
   computed: {
+    ...mapState(['servidorNotificacion'])
   },
   methods: {
       retroceder() {
@@ -81,6 +92,16 @@ export default {
       this.descripcion = this.notificacion.descripcion
       this.estado = this.buscarEstado(this.notificacion.estado)
       this.asunto = this.notificacion.asunto
+      this.model = {
+          ...this.notificacion
+      }
+      this.model.estado = 'LEIDO'
+      await axios.put(this.servidorNotificacion + '/notificaciones',{
+          params: {
+              ...this.model
+          }
+      })
+      console.log(this.model)
   }
 
 }

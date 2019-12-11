@@ -56,7 +56,8 @@ export default new Vuex.Store({
             {id: '4', nombre: 'crear-cargos', descripcion: 'Poder crear cargos'},
             {id: '5', nombre: 'modificar-cargos', descripcion: 'Poder modificar cargos'},
             {id: '6', nombre: 'eliminar-cargos', descripcion: 'Poder eliminar cargos'},
-        ]
+        ],
+        notificaciones: 0
     },
     mutations: {
         cambiarEstadoCuenta(state, correo) {
