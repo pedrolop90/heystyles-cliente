@@ -22,7 +22,7 @@
     "vue-clipboard2": "0.3.0",
     "vue-flatpickr-component": "8.1.2",
     "vue-loaders": "^3.0.2",
-    "vue-moment": "^4.0.0",
+    "vue-moment": "^4.1.0",
     "vue-router": "3.0.1",
     "vue-simple-suggest": "^1.10.1",
     "vue2-transitions": "0.3.0",
